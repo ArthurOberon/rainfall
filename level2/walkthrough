@@ -129,8 +129,6 @@ void p(void)
 
 level2@RainFall:~$ python -c "print 'c' * 76"
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-level2@RainFall:~$ ./le
-bash: ./le: No such file or directory
 level2@RainFall:~$ ./level2 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccJcccccccc
@@ -194,32 +192,6 @@ puts("test"test
 strdup("test")                                                  = 0x0804a008
 +++ exited (status 8) +++
 
-
-             ADRESSES HAUTES  (montent ↑)
-+-----------------------------+
-| EBP+8  argument p()         |
-+-----------------------------+
-| EBP+4  saved EIP            |
-+-----------------------------+
-| EBP    saved EBP            |
-+-----------------------------+
-| EBP-4  padding              |
-+-----------------------------+
-| EBP-1  local_50[75]         |
-+-----------------------------+
-| EBP-12 unaff_retaddr (4o)   |  <─── ÉCRIT PAR LE CODE !
-|        [EBP-12 à EBP-9]     |
-+-----------------------------+
-| EBP-13                      |
-| ...                         |
-| ...                         |
-|        ... 76 octets ...    |
-| EBP-76 local_50[0]          |
-+-----------------------------+
-| EBP-104 (nouveau ESP)       |
-+-----------------------------+
-             ADRESSES BASSES (descendent ↓)
-
              HIGH ADDRESSES  (↑ growing upward)
 +-----------------------------+
 | EBP+8   argument to p()     |
@@ -227,8 +199,6 @@ strdup("test")                                                  = 0x0804a008
 | EBP+4   saved EIP           |
 +-----------------------------+
 | EBP     saved EBP           | 
-+-----------------------------+
-| EBP-4   padding / alignment |
 +-----------------------------+
 | EBP-1   local_50[75]        | ← last byte of the buffer
 +-----------------------------+
