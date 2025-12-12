@@ -36,3 +36,6 @@ Throughout the different levels, several tools and techniques are used to solve 
 * Analyzing environments and understanding how systems and programs work.
 * Detecting and identifying weaknesses or vulnerabilities.
 * Exploiting vulnerabilities, including bypass techniques, code injection, program manipulation, and reverse engineering.
+
+
+https://sp21.cs161.org/assets/projects/1/cheatsheet.pdf
