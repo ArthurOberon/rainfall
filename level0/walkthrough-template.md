@@ -23,6 +23,7 @@ No !
 level0@RainFall:~$ ./level0 42
 No !
 ```
+
 We can see that the program expects **one argument** and only a **specific input** seems to be accepted.
 
 ## 2. Analyze The Executable
@@ -41,7 +42,7 @@ However, we can still use **gdb** (on the VM) and **Ghidra** (on the host machin
 - In **Ghidra**, we can load the executable and obtain a **readable** (non-executable) version of the code in **pseudo-C**.
 
 To view the full disassembly code :
-- In asm, go to **-FILE-** file.
+- In asm, go to **gdb-dump** file.
 - In pseudo-C, go to **source** file.
 
 ### Program Behavior
