@@ -105,7 +105,7 @@ EBP - 0xC  →  EBP - 12	(0xC being 12 in hexadecimal)
 
 Since `unaff_retaddr` is a `4-byte` variable, it overlaps with `4 bytes` of `local_50`, from `local_50[64]` to `local_50[67]`.
 
-The `and` operation modifies these bytes, which explains the **unexpected characters** observed in the output (e.g. `[...]aaJ����`).
+The `and` **operation** modifies these bytes, which explains the **unexpected characters** observed in the output (e.g. `[...]aaJ����`).
 
 ---
 
@@ -144,7 +144,7 @@ This shellcode is 21 bytes long, with this we can **define the structure of the 
 	21		+ 		59		 	+ 			4				 = 84
 ```
 
-The **overflow** must be **80 bytes** instead of 76, because `unaff_retaddr` **corrupts 4 bytes** of the buffer during the `and` operation.
+The **overflow** must be **80 bytes** instead of 76, because `unaff_retaddr` **corrupts 4 bytes** of the buffer during the `and` **operation**.
 
 This behavior can be observed with the following tests:
 
