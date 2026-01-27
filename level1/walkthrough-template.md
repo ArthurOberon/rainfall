@@ -30,7 +30,7 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 Segmentation fault (core dumped)
 ```
 
-These tests indicate a buffer overflow vulnerability (here triggered with 76 `a` characters), meaning there is no protection on the input buffer.
+These tests indicate a **buffer overflow vulnerability** (here triggered with 76 `a` characters), meaning there is **no protection** on the input buffer.
 
 ## 2. Analyze The Executable
 
@@ -56,77 +56,101 @@ The `main` function calls `gets()` to read user input into a local variable name
 
 #### run function
 
-Our goal is to redirect execution to the `run` function, which spawns a shell with `level2` privileges.
+Our goal is to **redirect execution** to the `run` function, which spawns a shell with `level2` privileges.
 
-This can be achieved by exploiting the buffer overflow vulnerabilty in `local_50`, which receives the result of `gets()`.
+This can be achieved by **exploiting** the **buffer overflow vulnerabilty** in `local_50`, which receives the result of `gets()`.
 
-A buffer overflow attack consists of writing more data than the allocated space of a local variable on the stack, allowing us to overwrite critical values such as saved registers.
+A **buffer overflow attack** consists of **writing more data** than the allocated space of a **local variable on the stack**, allowing us to overwrite critical values such as saved registers.
 
 ### Stack Understanding
 
-To understand the buffer overflow, we need to understand how the stack works.
+To understand the buffer overflow, we need to **understand how the stack works**.
 
-The stack is a memory area organized as FILO (First In, Last Out).
+The **stack** is a memory area organized as **FILO** (First In, Last Out).
 On x86 architectures, the stack grows from high addresses to low addresses.
 
 At each function call, the stack frame contains:
 
-- the saved EIP (Instruction Pointer), which points to the next instruction of the caller (4 bytes, located at EBP+4)
-- the saved EBP (Base Pointer) of the caller (4 bytes, located at EBP)
-- the current function sets EBP to point to the new stack frame
+- The **saved EIP** (Instruction Pointer), which points to the **next instruction** of the caller (4 bytes, located at EBP+4).
+- The **saved EBP** (Base Pointer) of the **caller** (4 bytes, located at EBP).
+- The current function **sets EBP** to point to the **new stack frame**.
+- **Space** allocated for **local variables** by adjusting **ESP**.
 
-space is then allocated for local variables by adjusting ESP
+This means that **local variables** are located **below the saved EBP**, and **overflowing** them allows us to **overwrite** the **saved EBP** and then the **saved EIP**.
 
-This means that local variables are located below the saved EBP, and overflowing them allows us to overwrite the saved EBP and then the saved EIP.
+![img](Ressources/stack-frame.png)
 
-	Caller :
-	Callee :
+---
+Terminology :
+- **Callee** : The function that calls another function.
+- **Caller** : The function that is being called.
 
 ---
 
 ### Understand The Attack
 
-Over writing on the var local, will crush the old ebp and old eip.
-old eip etant un pointeur can be used to redirect to another function.
-The idea is to overwrite with anything and finish by the address of the target function.
-It's important to write the address by reverse (`0x08040200` -> `\x00\x02\x04\x08`).
-The tricky part is to found the good buffer to overwrite on the var local and old ebp but not old eip.
+By **overflowing** the **local variable**, we **overwrite** the saved EBP and the **saved EIP**.
+The **saved EIP** being a pointer can be used to **redirect execution** to another function.
+
+The idea is to **overwrite** the buffer with **arbitrary data** and **end** the **payload** with the **address of the target** function.
+Because of **little-endian architecture**, the address must be **written in reverse byte order** (e.g. `0x01234567` → `\x67\x45\x23\x01`).
+
+The tricky part is finding the correct offset: enough bytes to overwrite the local variable and the saved EBP, but stopping exactly at the saved EIP.
 
 ---
-### ?
 
-For this bnary the stack look like this : 
+## 3. Exploit Development
+
+For this binary, the stack layout looks like this : 
 
 ![img](Ressources/level1.png)
 
-So it need a buffer of 76 + the address to the `run()` function.
+### 3.a Exploit with `run()`
+
+
+So it need a buffer of **76** + the address to the `run()` function.
 `run` as the address `0x08048444` `\x44\x84\x04\x08` in reverse.
+
+To reach the saved EIP, we need a buffer of **76 bytes**, followed by the address of the `run()` function.
+
+The address of `run()` is `0x08048444`. In little-endian format:
+```
+\x44\x84\x04\x08
+```
+
+With that we can create the payload:
 
 ```
 python -c "print 'A' * 76 + '\x44\x84\x04\x08'"
 ```
 
 **Explanation:**
-- `python`				: 
-- `-c` 					: 
-- `print` 				: 
+- `python`				: launches the Python interpreter.
+- `-c` 					: executes the command passed as a string.
+- `print` 				: outputs data to standard output.
 
-#### ?
+### 3.a Exploit with `system()`
 
-It can also be a pointer to the `system()` call directly.
+It is also possible to redirect execution directly to the `system()` call.
 
 ```
    0x08048472 <+46>:	movl   $0x8048584,(%esp)
    0x08048479 <+53>:	call   0x8048360 <system@plt>
 ```
 
-Jumping to the address before the call (to setup the call) : `0x08048472` `\x72\x84\x04\x08` in reverse. 
+We need to **jump before the call** to ensure that the **argument** is properly **set up**.
+The address of the target is `0x08048472`. In little-endian format:
+```
+\x72\x84\x04\x08
+```
+
+With that we can create the payload:
 
 ```
 python -c "print 'A' * 76 + '\x72\x84\x04\x08'"
 ```
 
-## 4. Execute The ? Attack ? / Get The Flag
+## 4. Execute The Exploit - Get The Flag
 
 ```
 level1@RainFall:~$ python -c "print 'A' * 76 + '\x44\x84\x04\x08'" > /tmp/payload
