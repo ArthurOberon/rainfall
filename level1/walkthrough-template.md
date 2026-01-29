@@ -60,6 +60,8 @@ Our goal is to **redirect execution** to the `run` function, which spawns a shel
 
 This can be achieved by **exploiting** the **buffer overflow vulnerabilty** in `local_50`, which receives the result of `gets()`.
 
+---
+
 A **buffer overflow attack** consists of **writing more data** than the allocated space of a **local variable on the stack**, allowing us to overwrite critical values such as saved registers.
 
 ### Stack Understanding
@@ -81,6 +83,7 @@ This means that **local variables** are located **below the saved EBP**, and **o
 ![img](Ressources/stack-frame.png)
 
 ---
+
 Terminology :
 - **Callee** : The function that calls another function.
 - **Caller** : The function that is being called.
@@ -105,8 +108,30 @@ For this binary, the stack layout looks like this :
 
 ![img](Ressources/level1.png)
 
-### 3.a Exploit with `run()`
+---
 
+Note:
+`ESP` ends up at `EBP - 88 bytes` because of the **stack alignment** and **allocation** performed in the function prologue:
+
+```s
+   0x08048483 <+3>:	and    $0xfffffff0,%esp
+   0x08048486 <+6>:	sub    $0x50,%esp
+```
+
+The `and` operation with `0xfffffff0` **aligns** the **stack** on a **16-byte boundary**, effectively clearing the **lower 4 bits** of ESP.
+This results in an additional offset of **up to 8 bytes** (depending on the initial value of `ESP`).
+
+The `sub` operation with `0x50` then allocates **80 bytes** (`0x50` in decimal) for **local variables**.
+
+As a result:
+
+```
+ESP = EBP - 80 - 8 = EBP - 88 bytes
+```
+
+---
+
+### 3.a Exploit with `run()`
 
 So it need a buffer of **76** + the address to the `run()` function.
 `run` as the address `0x08048444` `\x44\x84\x04\x08` in reverse.

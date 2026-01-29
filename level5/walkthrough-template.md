@@ -49,7 +49,7 @@ Here, we find 3 interesting functions: `main`, `n` and `o`.
 
 #### main function
 
-The `main` function calls `n()` then return.
+The `main` function calls `n()` then returns.
 
 
 ### n function 

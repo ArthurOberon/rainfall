@@ -48,7 +48,7 @@ Here, we find 2 interesting functions: `main` and `v`.
 #### main function
 
 
-The `main` function calls `v()` then return.
+The `main` function calls `v()` then returns.
 
 ### v function 
 

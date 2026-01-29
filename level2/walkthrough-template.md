@@ -69,7 +69,7 @@ Here, we find 2 interesting functions: `main` and `p`.
 #### main function
 
 
-The `main` function calls `p()` then return.
+The `main` function calls `p()` then returns.
 
 ### p function 
 
@@ -91,7 +91,7 @@ If the check passes, the program **continues normally**. The input is printed us
 
 By analyzing the **assembly dump**, we can observe that `unaff_retaddr` is actually **stored** at offset `-0xc(%ebp)`:
 
-```
+```s
    0x080484f5 <+33>:	mov    %eax,-0xc(%ebp)
    0x080484f8 <+36>:	mov    -0xc(%ebp),%eax
    0x080484fb <+39>:	and    $0xb0000000,%eax
@@ -112,6 +112,23 @@ The `and` **operation** modifies these bytes, which explains the **unexpected ch
 So, the stack layout looks like this :
 
 ![img](Ressources/level2.png)
+
+---
+
+Note:
+`ESP` ends up at `EBP - 104 bytes` because of the **allocation** performed in the function prologue:
+
+```s
+   0x080484d7 <+3>:	sub    $0x68,%esp
+```
+
+The `sub` operation with `0x68` then allocates **104 bytes** (`0x68` in decimal) for **local variables**.
+
+As a result:
+
+```
+ESP = EBP - 104
+```
 
 ---
 
