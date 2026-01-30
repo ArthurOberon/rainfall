@@ -89,7 +89,9 @@ The **heap** is a **memory area** used for **dynamic memory allocation**, manage
 
 Unlike the stack, which follows a FILO (First In, Last Out) order and is automatically organized at each function call, the heap is **non-structured** and **updated dynamically** by the program. This lack of structure can lead to **fragmentation**, where free memory is split into multiple non-contiguous blocks.
 
-In **x86 architecture**, allocations are placed in **contiguous regions in the process’s memory**, and each allocation is associated with **metadata** used by the memory allocator. This metadata is usually placed **just before the usable memory area** and can include **size**, **state** (free or allocated), **pointers to neighboring blocks**, and **flags**. Each allocated block is often called a **chunk**, and free chunks are organized in **bins or free lists** to optimize memory management.
+In **x86 architecture**, allocations are placed in **contiguous regions in the process’s memory**, and each allocation is associated with **metadata** used by the memory allocator. This metadata is usually placed **just before the usable memory area** and can include **size information**, **state** (free or allocated), **pointers to neighboring blocks**, and **various flags**. Each allocated block is often called a **chunk**, and free chunks are organized in **bins or free lists** to optimize memory management.
+
+On x86 **32-bit systems**, there is also an **8-byte alignment requirement**. If the **allocated memory** would **not start** on an **8-byte boundary**, the allocator will **adjust the block** or **add padding** to ensure that the **usable memory area** is **properly aligned**. This guarantees correct access for pointers, integers, and other data types.
 
 When an **allocation occurs** on the **heap**:
 - The **allocator selects** a **suitable memory region**.
@@ -97,6 +99,9 @@ When an **allocation occurs** on the **heap**:
 - It **returns a pointer** to the **beginning of the usable memory area** to the program.
 
 ![img](Ressources/heap-layout.png)
+
+Note:
+The size and contents of metadata can vary depending on the allocator, the architecture, and compiler options.
 
 ---
 
@@ -115,11 +120,11 @@ the **heap layout** looks like this :
 ---
 
 Note:
-On x86 architectures, the **heap chunk metadata size** is **8 bytes**.
+The **8 bytes** of **heap chunk metadata** include both the **metadata** itself and **any padding** required to satisfy **8-byte alignment** on **x86 32-bit systems**. The exact size and contents of the metadata can vary depending on the allocator and architecture.
 
 ### Understand The Attack
 
-By **overflowing** the **`__dest` buffer**, we can overwrite the **heap metadata** and then the **memory allocated** for `puVar1`, which contains a **function pointer**.
+By **overflowing** the **`__dest` buffer**, we can overwrite the **heap metadata / 8-byte  alignment** and then the **memory allocated** for `puVar1`, which contains a **function pointer**.
 
 By overwriting this **function pointer** with the **address of `n()`**, the call `(*(code *)*puVar1)();` will **redirect execution** to `n()`, which prints the `.pass` file for `level7`.
 
@@ -130,12 +135,12 @@ First, we need to **calculate the overflow offset** required to reach the **memo
 The layout is:
 
 ```
-<__dest> → <puVar1 metadata> → <puVar1 data>  
+<__dest> → <puVar1 metadata / alignment> → <puVar1 data>  
 ```
 
 Which corresponds to:
 ```
-64 bytes (__dest) + 8 bytes (heap metadata) → <puVar1 data>  
+64 bytes (__dest) + 8 bytes (heap metadata / alignment) → <puVar1 data>  
 ```
 
 Therefore, the required offset is **72 bytes**.

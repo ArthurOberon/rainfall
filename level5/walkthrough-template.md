@@ -86,7 +86,70 @@ $2 = {<text variable, no debug info>} 0x80484a4 <o>
 
 We can observe that `exit()` uses an **indirect jump** through a pointer located at address `0x8049838`.
 
-By **overwriting this pointer**, we can **redirect** the **execution flow** to the `o()` function.
+This pointer is an entry in the **GOT (Global Offset Table)** associated with `exit()`.
+
+---
+
+### PLT (Procedure Linkage Table) & GOT (Global Offset Table)
+
+In **x86 ELF binaries**, **external functions** are **dynamically linked** using the **PLT** and **GOT**.
+
+During **compilation**, the **binary does not know** the **runtime addresses** of external functions like `exit()`, `printf()`, etc. It **cannot call them directly**.
+
+This is where the **PLT** and **GOT** come into play:
+
+The **PLT (Procedure Linkage Table)** is a **small stub** (a tiny piece of assembly code) that serves as an **intermediate jump** point between the **program** and the **GOT**.
+
+Example of a **PLT stub** for `exit()`:
+```bash
+   0x80483d0 <exit@plt>:	jmp    *0x8049838
+   0x80483d6 <exit@plt+6>:	push   $0x28
+   0x80483db <exit@plt+11>:	jmp    0x8048370
+```
+
+The **GOT (Global Offset Table)** is a **table of pointers** in memory, each **entry** containing the **real address** of an **external function**. These addresses are **filled at runtime** by the **dynamic linker**.
+
+This **process** is known as **lazy binding**.
+
+#### Lazy Binding Process
+
+First call to exit():
+```md
+call exit@plt
+    ↓
+PLT stub jumps to GOT[exit]
+    ↓
+GOT[exit] points to the dynamic linker
+    ↓
+Dynamic linker resolves the real address of exit()
+    ↓
+GOT[exit] is updated with the real address
+    ↓
+exit() executes
+```
+
+Subsequent calls to exit():
+```md
+call exit@plt
+    ↓
+PLT stub jumps to GOT[exit]
+    ↓
+GOT[exit] already contains the real address of exit()
+    ↓
+exit() executes directly
+```
+
+---
+
+In this case:
+
+```bash
+   0x80483d0 <exit@plt>:	jmp    *0x8049838
+```
+
+`0x8049838` is the **GOT entry** for `exit()`. This entry contains the **real address** of `exit()` in libc.
+
+By **overwriting this GOT entry**, any subsequent call to `exit()` will instead jump to `o()`.
 Therefore, we need to overwrite the value at `0x8049838` with `0x80484a4`, which is the address of `o()`.
 
 ---
