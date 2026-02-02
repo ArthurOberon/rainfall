@@ -58,7 +58,7 @@ The `main` function calls `gets()` to read user input into a local variable name
 
 Our goal is to **redirect execution** to the `run` function, which spawns a shell with `level2` privileges.
 
-This can be achieved by **exploiting** the **buffer overflow vulnerabilty** in `local_50`, which receives the result of `gets()`.
+This can be achieved by **exploiting** the **buffer overflow vulnerability** in `local_50`, which receives the result of `gets()`.
 
 ---
 
@@ -84,9 +84,10 @@ This means that **local variables** are located **below the saved EBP**, and **o
 
 ---
 
-Terminology :
-- **Callee** : The function that calls another function.
-- **Caller** : The function that is being called.
+Terminology:
+- **Caller**: The function that calls another function.
+- **Callee**: The function that is being called.
+
 
 ---
 
@@ -107,6 +108,10 @@ The tricky part is finding the correct offset: enough bytes to overwrite the loc
 For this binary, the stack layout looks like this : 
 
 ![img](Ressources/level1.png)
+
+**Explanation:**
+- **Top frame**: The caller's stack frame (before `main()` is called).
+- **Bottom frame**: The `main()` function's stack frame, showing `local_50` (72 bytes), saved EBP (4 bytes), and saved EIP (4 bytes).
 
 ---
 
@@ -133,9 +138,6 @@ ESP = EBP - 80 - 8 = EBP - 88 bytes
 
 ### 3.a Exploit with `run()`
 
-So it need a buffer of **76** + the address to the `run()` function.
-`run` as the address `0x08048444` `\x44\x84\x04\x08` in reverse.
-
 To reach the saved EIP, we need a buffer of **76 bytes**, followed by the address of the `run()` function.
 
 The address of `run()` is `0x08048444`. In little-endian format:
@@ -154,7 +156,7 @@ python -c "print 'A' * 76 + '\x44\x84\x04\x08'"
 - `-c` 					: executes the command passed as a string.
 - `print` 				: outputs data to standard output.
 
-### 3.a Exploit with `system()`
+### 3.b Exploit with `system()`
 
 It is also possible to redirect execution directly to the `system()` call.
 
@@ -175,7 +177,10 @@ With that we can create the payload:
 python -c "print 'A' * 76 + '\x72\x84\x04\x08'"
 ```
 
-## 4. Execute The Exploit - Get The Flag
+## 4. Execute The Exploit - Capture The Flag
+
+**Note:**  
+We use `cat /tmp/payload -` to send the payload and then keep `stdin` open. The dash (`-`) tells `cat` to continue reading from stdin, allowing us to interact with the spawned shell.
 
 ```
 level1@RainFall:~$ python -c "print 'A' * 76 + '\x44\x84\x04\x08'" > /tmp/payload

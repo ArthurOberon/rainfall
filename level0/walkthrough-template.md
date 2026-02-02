@@ -24,7 +24,8 @@ level0@RainFall:~$ ./level0 42
 No !
 ```
 
-We can see that the program expects **one argument** and only a **specific input** seems to be accepted.
+The program expects **one argument**, and it appears that only a **specific value** is accepted.
+
 
 ## 2. Analyze The Executable
 
@@ -39,22 +40,22 @@ The VM (Virtual Machine) blocks several debugging and analysis tools such as `st
 
 However, we can still use **gdb** (on the VM) and **Ghidra** (on the host machine) to **analyze** the binary.
 - In **gdb**, we can **disassemble functions** using commands like `disas main`.
-- In **Ghidra**, we can load the executable and obtain a **readable** (non-executable) version of the code in **pseudo-C**.
+- In **Ghidra**, we can load the executable and obtain a **human-readable decompiled** version of the code in **pseudo-C**.
 
-To view the full disassembly code :
-- In asm, go to **gdb-dump** file.
-- In pseudo-C, go to **source** file.
+The full disassembly code is available in separate files:
+- **Assembly code**: see the `gdb-dump` file.
+- **Pseudo-C code**: see the `source` file.
 
 ### Program Behavior
 
-The program takes the first argument (`argv[1]`), passes it to `atoi()`, and compares the result to a **constant value**. 
+The program takes the first argument (`argv[1]`), converts it to an integer using `atoi()`, and compares the result to a **constant value**.
+
 
 If the result is equal to `0x1a7`, the program calls `execv()` with `/bin/sh`.
 Because of the **setuid bit**, the shell is executed with **`level1` privileges**.
 If the condition is not met, the program prints `"No !"` and exits.
 
-## 3. Find The ? Flaw ? Trigger Point ? Attack Point ?
-
+## 3. Identify The Vulnerability
 
 To read `/home/user/level1/.pass`, we need `level1` permissions, which we can obtain via the `execv()` call.
 The **key condition** is the **comparison** before the `execv()` call.
@@ -70,12 +71,14 @@ In pseudo-C:
 ```
 (`iVar1` is the return value of `atoi(argv[1])`.)
 
+Converting the hex value:
 ```
 0x1a7 = 423
 ```
 So the **program simply** expects the argument to be **423**.
+This is known as a **magic number**: an arbitrary hardcoded constant and value used to control program flow or unlock specific functionality.
 
-## 4. Execute The ? Attack ? / Get The Flag
+## 4. Capture The Flag
 
 ```
 level0@RainFall:~$ ./level0 423

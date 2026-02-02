@@ -23,7 +23,7 @@ level6@RainFall:~$ ./level6 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 Nope
 ```
 
-The program takes the argument, and prints "Nope" most of the time. 
+The program takes an argument and prints `"Nope"` most of the time.
 
 ```bash
 level6@RainFall:~$ ./level6 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -66,7 +66,7 @@ Next, the program **copies** the string provided as **argument** into **`__dest`
 The source of the copy is `*(char **)(param_2 + 4)`, which corresponds to `argv[1]` in Ghidra’s decompilation output.
 This copy is performed without any bounds checking, making it vulnerable to a buffer overflow.
 
-Finally, the program **calls** the **function pointed** to by **`puVar1`** and then returns.
+Finally, the program **calls** the **function pointed to** by **`puVar1`** and then returns.
 
 #### m function
 
@@ -87,7 +87,7 @@ To understand a **Heap Buffer Overflow**, we first need to **understand how the 
 
 The **heap** is a **memory area** used for **dynamic memory allocation**, managed by functions such as `malloc` and `free`.
 
-Unlike the stack, which follows a FILO (First In, Last Out) order and is automatically organized at each function call, the heap is **non-structured** and **updated dynamically** by the program. This lack of structure can lead to **fragmentation**, where free memory is split into multiple non-contiguous blocks.
+Unlike the **stack**, which follows a **LIFO** (Last In, First Out) structure and is automatically managed during function calls, the heap is **dynamically managed** by the program. Memory can be allocated and freed in any order, which can lead to **fragmentation**, where free memory split into non-contiguous blocks.
 
 In **x86 architecture**, allocations are placed in **contiguous regions in the process’s memory**, and each allocation is associated with **metadata** used by the memory allocator. This metadata is usually placed **just before the usable memory area** and can include **size information**, **state** (free or allocated), **pointers to neighboring blocks**, and **various flags**. Each allocated block is often called a **chunk**, and free chunks are organized in **bins or free lists** to optimize memory management.
 
@@ -119,12 +119,19 @@ the **heap layout** looks like this :
 
 ---
 
-Note:
-The **8 bytes** of **heap chunk metadata** include both the **metadata** itself and **any padding** required to satisfy **8-byte alignment** on **x86 32-bit systems**. The exact size and contents of the metadata can vary depending on the allocator and architecture.
+**Note:**
+
+On x86 32-bit systems using `glibc` `malloc`, each heap chunk has an **8-byte header** containing:
+- `prev_size` (4 bytes): Size of the previous chunk (used for coalescing)
+- `size` (4 bytes): Size of the current chunk (includes flags in lower bits)
+
+The allocator ensures **8-byte alignment** by rounding up allocation sizes. When you request 64 bytes, the allocator may actually allocate 72 bytes (64 + 8 for metadata), ensuring the returned pointer is 8-byte aligned.
+
+The exact behavior depends on the allocator implementation and can vary between systems.
 
 ### Understand The Attack
 
-By **overflowing** the **`__dest` buffer**, we can overwrite the **heap metadata / 8-byte  alignment** and then the **memory allocated** for `puVar1`, which contains a **function pointer**.
+By **overflowing** the **`__dest` buffer**, we can overwrite the **heap chunk metadata** *(which includes the size field and alignment padding)* and then the **memory allocated** for `puVar1`, which contains a **function pointer**.
 
 By overwriting this **function pointer** with the **address of `n()`**, the call `(*(code *)*puVar1)();` will **redirect execution** to `n()`, which prints the `.pass` file for `level7`.
 
@@ -132,15 +139,18 @@ By overwriting this **function pointer** with the **address of `n()`**, the call
 
 First, we need to **calculate the overflow offset** required to reach the **memory area** of `puVar1` starting from `__dest`.
 
-The layout is:
+The layout in memory is:
 
 ```
-<__dest> → <puVar1 metadata / alignment> → <puVar1 data>  
+<__dest> → <puVar1 metadata / alignment> → <puVar1 data
+([Chunk 1 metadata: 8 bytes]) [__dest: 64 bytes] [Chunk 2 metadata: 8 bytes] [puVar1: 4 bytes]
+							  ↑
+							start here
 ```
 
 Which corresponds to:
 ```
-64 bytes (__dest) + 8 bytes (heap metadata / alignment) → <puVar1 data>  
+64 bytes (__dest buffer) + 8 bytes (chunk 2 metadata) = 72 bytes
 ```
 
 Therefore, the required offset is **72 bytes**.
@@ -161,6 +171,19 @@ The **target address** is therefore : `0x8048454`. In little-endian format:
 \x54\x84\x04\x08
 ```
 
+### Overflow Visualization
+```
+BEFORE overflow:
+[__dest: 64 bytes of 'a'] [metadata: 8 bytes] [puVar1: 0x08048468 (m)]
+
+__________________________________________________________________________
+
+DURING overflow:
+[__dest: 64 bytes of 'a'] [8 bytes of 'a'] [4 bytes: 0x08048454 (n)]
+                           └─────────────┘   └────────────────────┘
+                           Corrupted metadata    Overwritten pointer
+```
+
 ### Create the Payload
 
 ```bash
@@ -172,7 +195,7 @@ python -c "print 'a' * 72 + '\x54\x84\x04\x08'"
 - `-c` 				: executes the command passed as a string.
 - `print` 			: outputs data to standard output.
 
-## 4. Get The Flag
+## 4. Capture The Flag
 
 ```bash
 level6@RainFall:~$ ./level6 $(python -c "print 'a' * 72 + '\x54\x84\x04\x08'")

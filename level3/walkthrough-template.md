@@ -50,13 +50,13 @@ Here, we find 2 interesting functions: `main` and `v`.
 
 The `main` function calls `v()` then returns.
 
-### v function 
+#### v function 
 
-The `v` function first calls `fgets()` on `stdout` to store the input in a **local variable** `level_20c` with a **size limit** of `0x200` (i.e 512 in hexadecimal).
+The `v` function first calls `fgets()` on `stdout` to store the input in a **local variable** `level_20c` with a **size limit** of `0x200` (512 in decimal).
 
-Then it's check if a unknow variable (probably gobal) `m` is equal to `0x40` (i.e 64 in hexadecimal). If the condition is `true`, the program prints `Wait what?!\n` and call `system("/bin/sh")`.
+Then it checks if an unknown variable (probably global) `m` is equal to `0x40` (64 in decimal). If the condition is `true`, the program prints `Wait what?!\n` and call `system("/bin/sh")`.
 
-Then returns.
+The function then returns.
 
 ## 3. Exploit Development
 
@@ -67,15 +67,15 @@ Instead, the **vulnerability** comes from `printf()`.
 
 ### Discover `printf` Exploit
 
-The **exploit** is **caused** by the following line :
+The **vulnerability** exists in the following line:
 ```c
   printf(local_20c);
 ```
 
 Here, user-controlled input is passed **directly** as the **format string**.
-Instead of using a **safe call** such as: `printf("%s", local_20c);`. the program allows us to **inject format specifiers**.
+Instead of using a **safe call** such as `printf("%s", local_20c)`, the program allows us to **inject format specifiers**.
 
-For example, `%x` prints values from the stack by popping them one by one.
+For example, `%x` reads and prints values from the stack as hexadecimal, consuming one stack argument per specifier.
 This behavior allows us to read and write arbitrary values in memory.
 
 This attack is known as a **Format String Attack**.
@@ -96,7 +96,7 @@ Where:
   - `<padding>` represents the **number of characters** to print.
   - `<%X$n>` **writes** the number of printed characters to the **memory address** located at position `X` on the **stack**.
 
-The total **number of printed characters** (i.e `<memory address to update>` + `<padding>`) determines the **value written** to the target address.
+The total **number of printed characters** (i.e, `<memory address to update>` + `<padding>`) determines the **value written** to the target address.
 
 `%X$n` is a **positional format specifier** that allows writing to memory.
 
@@ -165,7 +165,7 @@ Note:
 
 
 
-## 4. Get The Flag
+## 4. Capture The Flag
 
 ```bash
 level3@RainFall:~$ python -c "print '\x8c\x98\x04\x08' + 'a' * 60  + '%4\$n' " > /tmp/p3

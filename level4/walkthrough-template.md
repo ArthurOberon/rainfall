@@ -51,13 +51,13 @@ Here, we find 3 interesting functions: `main`, `n` and `p`.
 
 The `main` function calls `n()` then returns.
 
-### n function 
+#### n function 
 
-The `n` function first calls `fgets()` on `stdout` to store the input in a **local variable** `level_20c` with a **size limit** of `0x200` (i.e 512 in hexadecimal).
+The `n` function first calls `fgets()` on `stdout` to store the input in a **local variable** `level_20c` with a **size limit** of `0x200` (512 in decimal).
 
-Then it's check if a unknow variable (probably gobal) `m` is equal to `0x1025544` (i.e 16930116 in hexadecimal). If the condition is `true`, the program calls `system("/bin/cat /home/user/level5/.pass")`.
+It then checks if an unknown variable (probably global) `m` is equal to `0x1025544` (16930116 in decimal). If the condition is `true`, the program calls `system("/bin/cat /home/user/level5/.pass")`.
 
-### p function 
+#### p function 
 
 The `p` function prints user-controlled input by calling `printf()` directly.
 
@@ -135,9 +135,9 @@ The padding ensures that exactly **16930116 characters** are printed before the 
 
 This approach would **cause an error**. Printing `16930116` **characters** would be **too much** for the **program** and would result in a `Broken pipe`.
 
-Instead of writing `16930116` `a` characters, we can use a **formatted padding** with `%x`, like this: `%16930116x`.
+Instead of writing 16930112 literal `a` characters (which would cause a broken pipe), we can use a **width specifier** with `%x` to generate the padding, like this: `%16930112x`.
 
-`%x` **prints** and **pops** the value at the **top of the stack**.  
+`%x` **reads and prints** the value at the current position on the stack, then advances to the next stack argument.
 When a width is specified, `printf` uses it as a **minimum field width**.
 
 It pads the output with spaces **before** the value so that the total number of printed characters **matches** the **specified width**.
@@ -169,7 +169,7 @@ Note:
 - `-c` 					: executes the command passed as a string.
 - `print` 			: outputs data to standard output.
 
-## 4. Get The Flag
+## 4. Capture The Flag
 
 ```bash
 level4@RainFall:~$ python -c "print '\x10\x98\x04\x08' + '%16930112x' + '%12\$n' " | ./level4

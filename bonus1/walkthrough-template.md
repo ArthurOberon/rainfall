@@ -34,7 +34,7 @@ blablabla
 - `` 				: blablabla.
 - `` 				: blablabla.
 
-## 4. Get The Flag
+## 4. Capture The Flag
 
 ```bash
 > su flagXX

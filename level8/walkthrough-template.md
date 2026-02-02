@@ -117,7 +117,7 @@ Therefore, by calling **`service` twice**, we can create **enough space** on the
 
 ![img](Ressources/heap-layout.png)
 
-## 4. Get The Flag
+## 4. Capture The Flag
 
 ```bash
 
