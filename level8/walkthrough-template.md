@@ -65,9 +65,9 @@ At each iteration, it:
 
 #### auth
 
-**Allocates `4 bytes`** on the heap for the global variable **`auth`**. Then allocated memory is **manually zero-initialized**.
+**Allocates `4 bytes`** on the heap for the global pointer **`auth`** using `malloc(4)`. The allocated memory is then **manually zero-initialized**.
 
-If the provided argument length is less than `30 bytes`, the program copies user-controlled input into `auth` using `strcpy()`.
+If the provided argument length is less than `30 bytes`, the program copies user-controlled input into the `auth` buffer using `strcpy()`.
 
 #### reset
 
@@ -75,12 +75,12 @@ The memory pointed to by **`auth`** is **freed**.
 
 #### service
 
-The program **duplicates** an unknown variable `acStack_89` in `service` using `strdup()`.
+The program **duplicates** the command argument (stored in the local buffer) into the global pointer `service` using `strdup()`.
 
 #### login
 
 The program reads an **integer located** at **`auth + 0x20`** (32 in decimal).
-If it is **non-NULL**, it **executes **`system("/bin/sh")`; otherwise, it prints `"Password"`.
+If it is **non-NULL**, it **executes** `system("/bin/sh")`; otherwise, it prints `"Password"`.
 
 ### Try the Program
 
@@ -103,13 +103,24 @@ This is expected behavior on **x86 32-bit systems**, because of the **small size
 
 ### 3. Exploit Development
 
-Our goal is to **execute** the `system` call, which means making the value located at **`auth + 0x20`** **non‑NULL**.
+Our goal is to **execute** the `system("/bin/sh")` call, which requires making the value located at **`auth + 0x20`** (32 bytes after `auth`) **non-zero**.
 
 To achieve this, we need to **control the heap** layout so that **data ends up at this offset**, and that the heap layout look like this:
 
 ![img](Ressources/heap-layout-wanted.png)
 
-So we need a gap of at least **`32 bytes`** between the **start of `auth`** and **some controlled data**.
+To reach the check at `auth + 0x20` (32 bytes), we need **at least 32 bytes** of memory after the start of `auth` that contains **non-zero data**.
+
+The `login` command checks:
+```c
+if (*(int *)(auth + 32) == 0) {
+    printf("Password:\n");
+} else {
+    system("/bin/sh");
+}
+```
+
+If **any data exists** at offset 32 from `auth`, the condition fails and we get a shell.
 
 From our observations, each call to `service` creates a **heap allocation of `16 bytes`**.
 

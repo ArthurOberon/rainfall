@@ -43,7 +43,7 @@ Non-debugging symbols:
 Using the gdb command `info functions`, we can list all functions present in the binary.
 Here, we find 2 interesting functions: `main` and `v`.
 
-## Program Behavior
+### Program Behavior
 
 #### main function
 

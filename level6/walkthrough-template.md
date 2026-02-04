@@ -98,10 +98,29 @@ When an **allocation occurs** on the **heap**:
 - It **sets up** the **metadata** for that chunk.
 - It **returns a pointer** to the **beginning of the usable memory area** to the program.
 
+---
+
+### Heap and CPU's Memory Space Layout
+
 ![img](Ressources/heap-layout.png)
 
-Note:
-The size and contents of metadata can vary depending on the allocator, the architecture, and compiler options.
+**Metadata Legend:**
+
+- **`prev_size` (4 bytes)**: Size of the previous chunk. Only used if the previous chunk is **free**. If the previous chunk is allocated, this space can be reused as part of the previous chunk's user data.
+
+- **`size` (4 bytes)**: Size of the current chunk in bytes.
+
+- **Flags (3 bits embedded in `size`):**
+  - **`P` (Previous In Use)**: Set to 1 if the previous chunk is allocated, 0 if free. This determines whether `prev_size` is valid.
+  - **`M` (Mmapped)**: Set to 1 if this chunk was allocated via `mmap()` instead of being part of the heap.
+  - **`N` (Non-main arena)**: Set to 1 if this chunk belongs to a non-main memory arena (used in multi-threaded programs).
+
+- **`forward pointer` (4 bytes)**: Points to the next free chunk in the free list (bin). Only present in **free chunks**.
+
+- **`backward pointer` (4 bytes)**: Points to the previous free chunk in the free list (bin). Only present in **free chunks**.
+
+**Note:**
+This data structure is specific to glibc malloc on x86 32-bit systems. The size and contents of metadata can vary depending on the allocator, the architecture, and compiler options.
 
 ---
 
@@ -111,19 +130,15 @@ To better understand the overall picture, here is a **simplified view of a proce
 
 ---
 
-### Heap Layout
+### Level Heap Layout
 
-the **heap layout** looks like this :
+In this level, the **heap layout** looks like this :
 
 ![img](Ressources/level6.png)
 
 ---
 
 **Note:**
-
-On x86 32-bit systems using `glibc` `malloc`, each heap chunk has an **8-byte header** containing:
-- `prev_size` (4 bytes): Size of the previous chunk (used for coalescing)
-- `size` (4 bytes): Size of the current chunk (includes flags in lower bits)
 
 The allocator ensures **8-byte alignment** by rounding up allocation sizes. When you request 64 bytes, the allocator may actually allocate 72 bytes (64 + 8 for metadata), ensuring the returned pointer is 8-byte aligned.
 
@@ -142,10 +157,9 @@ First, we need to **calculate the overflow offset** required to reach the **memo
 The layout in memory is:
 
 ```
-<__dest> → <puVar1 metadata / alignment> → <puVar1 data
 ([Chunk 1 metadata: 8 bytes]) [__dest: 64 bytes] [Chunk 2 metadata: 8 bytes] [puVar1: 4 bytes]
-							  ↑
-							start here
+						              	  ↑
+						              	start here
 ```
 
 Which corresponds to:
@@ -172,17 +186,8 @@ The **target address** is therefore : `0x8048454`. In little-endian format:
 ```
 
 ### Overflow Visualization
-```
-BEFORE overflow:
-[__dest: 64 bytes of 'a'] [metadata: 8 bytes] [puVar1: 0x08048468 (m)]
 
-__________________________________________________________________________
-
-DURING overflow:
-[__dest: 64 bytes of 'a'] [8 bytes of 'a'] [4 bytes: 0x08048454 (n)]
-                           └─────────────┘   └────────────────────┘
-                           Corrupted metadata    Overwritten pointer
-```
+![img](Ressources/level6-overflow.png)
 
 ### Create the Payload
 

@@ -18,8 +18,7 @@ level9@RainFall:~$ ./level9 aaaaaaaaaaaaa a
 level9@RainFall:~$ ./level9 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa a
 ```
 
-The program do nothing at first sights. 
-
+The program appears to do nothing and exits.
 
 ```bash
 level9@RainFall:~$ ./level9 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa a
@@ -74,13 +73,13 @@ Every object of such a class contains a **hidden pointer** (usually at the very 
 
 #### main function
 
-The `main` function first checks if there at least 1 argument. If not, the program exits.
+The `main` function first checks if there at least 1 argument. If no argument is provided, the program exits.
 
 It then **allocates 2 objects of type `N`** using operator `new`, each with a size of **`0x6c` bytes** (108 in decimal). After allocation, the **constructor `N::N(int)`** is called on each object. The first object (`this`) is initialized with the value `5`, and the second object (`this_00`) is initialized with the value `6`.
 
 Next, the program **calls** the **method `setAnnotation()`** on the first object, passing `argv[1]` as argument.
 
-Then the program performs a **calls** to a **`virtual method`** with `this_00` and `this` as parameters. The **`method`** is **retrived** from the **`vtable` of `this_00`**.
+Then the program **calls** a **virtual method** through the vtable of `this_00`, passing both `this_00` and `this` as parameters. The **method** is **retrieved** from the **vtable of `this_00`**.
 
 And then returns.
 
@@ -106,7 +105,7 @@ public:
 	N(int i);
 	~N();
 
-	N:setAnnotation(char s);
+	void setAnnotation(char s);
   
 };
 ```
@@ -228,14 +227,14 @@ _Znwj(108, 0xbffff7e4, 0xbffff7f4, 0xb7d79e55, 0xb7fed280)      = 0x804a008
 _Znwj(108, 5, 0xbffff7f4, 0xb7d79e55, 0xb7fed280)               = 0x804a078
 ```
 
-The addresses confirm a distance of `112 bytes` between the 2 objects:
+The addresses confirm a **distance of `112 bytes`** between the 2 objects:
 ```
 0x804a078 - 0x804a008 = 0x70 = 112 bytes.
 ```
 
 This matches the expected object size:
-- `0x6c` (108 bytes) for the object itself.
-- + `4 bytes` for alignment / metadata.
+- `0x6c` (108 bytes) for the **object itself**.
+- + `4 bytes` for **alignment / metadata**.
 
 ---
 

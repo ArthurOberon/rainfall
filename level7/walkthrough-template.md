@@ -10,9 +10,11 @@ total 8
 
 We can see that the binary has the `s` bit set on the **execution permission**, which means the program will run with level8 privileges.
 
-blablabla
-
 ```bash
+level7@RainFall:~$ ./level7 
+Segmentation fault (core dumped)
+level7@RainFall:~$ ./level7 a
+Segmentation fault (core dumped)
 level7@RainFall:~$ ./level7 a a
 ~~
 level7@RainFall:~$ ./level7 abc abc
@@ -21,7 +23,7 @@ level7@RainFall:~$ ./level7 aaaaaaaaaaaaaaaaaa abc
 ~~
 ```
 
-The program takes 2 arguments, and prints "~~". 
+The program expects **two arguments** and prints `"~~"` when executed successfully.
 
 ```bash
 level7@RainFall:~$ ./level7 aaaaaaaaaaaaaaaaaaa abc
@@ -54,16 +56,6 @@ Here, we find 2 interesting functions: `main` and `m`.
 
 #### main function
 
-The `main` function operate several memory allocation using `malloc()`, each of a size of `8` bytes.
-This bunch of `malloc` gives at the end 2 var : puVar1 and puVar3 and both puVar1[1] and puVar3[1] are allocated (pvVar2 used as tmp for allocated this space).
-
-Then is copy with `strcpy()` argv[1] in puVar1[1] and argv[2] in puVar3[1].
-
-Then open the file `/home/user/level8/.pass` with `fopen` and saves it in the var global `c` with `fgets`.
-
-Then prints `"~~"` with `puts()` and then returns.
-
-
 The `main` function performs **several memory allocations** using `malloc()`, each with a size of `8 bytes`.
 
 First, it **allocates memory** for `puVar1`:
@@ -82,9 +74,8 @@ After that, the program opens the file `/home/user/level8/.pass` using `fopen()`
 
 #### m function
 
-The `m` function 
+The `m` function retrieves the current time using `time()` and prints it alongside the global variable `c`.
 
-The m function retrieves the current time using `time()` and prints it alongside the global variable `c`.
 ---
 
 #### main function Deductions
@@ -116,10 +107,14 @@ The **8 bytes** of **heap chunk metadata** include both the **metadata** itself 
 
 ### Understand The Attack
 
+#### First `strcpy()`
+
 By **overflowing** the **`puVar1[1]` buffer** (i.e. `puVar1->buf`), we can overwrite **adjacent heap data**, in order:
 - The **heap chunk metadata / 8-byte alignment**.
 - The **memory allocated** for **`puVar3[0]`** (i.e. `puVar3->id`).
 - And the memory allocated for **`puVar3[1]`** (i.e. `puVar3->buf`).
+
+#### Second `strcpy()`
 
 The **second `strcpy()`** then **writes into `puVar3->buf`**.
 If we **overwrite `puVar3->buf`** with the **GOT entry address of `puts()`**, this second `strcpy()` will **overwrite** the **GOT entry itself** with **`argv[2]`**.
@@ -132,15 +127,17 @@ By **writing** the address of the **function `m()`** into the **GOT entry of `pu
 
 First, we need to **calculate the overflow offset** required to reach the **memory area** of `puVar3[1]` (i.e `puVar3->buf`) starting from `puVar1[1]` (i.e `puVar1->buf`).
 
-The layout is:
+The layout in memory is:
 
 ```
-<puVar1->buf> → <puVar3 metadata / alignment> → <puVar3->id> → <puVar3->buf>   
+([Chunk 1 metadata: 8 bytes]) [puVar1->id: 4 bytes] [puVar1->buf: 8 bytes] [Chunk 2 metadata: 8 bytes] [puVar3->id: 4 bytes] [puVar3->buf: 8 bytes]
+                                                    ↑
+                                                    start here
 ```
 
 Which corresponds to:
 ```
-8 bytes (puVar1->buf) → 8 bytes (puVar3 metadata / alignment) → 4 bytes (puVar3->id) → <puVar3->buf>   
+8 bytes (puVar1->buf) + 8 bytes (chunk 2 metadata) + 4 bytes (puVar3->id) = 20 bytes
 ```
 
 Therefore, the required offset is **20 bytes**.
@@ -174,6 +171,10 @@ And the **m() address** is therefore : `0x080484f4`. In little-endian format:
 ```
 \xf4\x84\x04\x08
 ```
+
+### Overflow Visualization
+
+![img](Ressources/level7-overflow.png)
 
 ### Create the Payload
 
