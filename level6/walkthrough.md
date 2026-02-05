@@ -91,7 +91,7 @@ Unlike the **stack**, which follows a **LIFO** (Last In, First Out) structure an
 
 In **x86 architecture**, allocations are placed in **contiguous regions in the process’s memory**, and each allocation is associated with **metadata** used by the memory allocator. This metadata is usually placed **just before the usable memory area** and can include **size information**, **state** (free or allocated), **pointers to neighboring blocks**, and **various flags**. Each allocated block is often called a **chunk**, and free chunks are organized in **bins or free lists** to optimize memory management.
 
-On x86 **32-bit systems**, there is also an **8-byte alignment requirement**. If the **allocated memory** would **not start** on an **8-byte boundary**, the allocator will **adjust the block** or **add padding** to ensure that the **usable memory area** is **properly aligned**. This guarantees correct access for pointers, integers, and other data types.
+On x86 **64-bit systems**, there is also an **8-byte alignment requirement**. If the **allocated memory** would **not start** on an **8-byte boundary**, the allocator will **adjust the block** or **add padding** to ensure that the **usable memory area** is **properly aligned**. This guarantees correct access for pointers, integers, and other data types.
 
 When an **allocation occurs** on the **heap**:
 - The **allocator selects** a **suitable memory region**.
@@ -120,7 +120,7 @@ When an **allocation occurs** on the **heap**:
 - **`backward pointer` (4 bytes)**: Points to the previous free chunk in the free list (bin). Only present in **free chunks**.
 
 **Note:**
-This data structure is specific to glibc malloc on x86 32-bit systems. The size and contents of metadata can vary depending on the allocator, the architecture, and compiler options.
+This data structure is specific to glibc malloc on x86 64-bit systems. The size and contents of metadata can vary depending on the allocator, the architecture, and compiler options.
 
 ---
 

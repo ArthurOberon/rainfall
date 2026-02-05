@@ -151,7 +151,7 @@ Both objects (`this` and `this_00`) are **allocated consecutively** on the heap.
 ![img](Ressources/level9.png)
 
 Note:
-The **4 bytes** of **heap chunk metadata** include both the **metadata** itself and **any padding** required to satisfy **8-byte alignment** on **x86 32-bit systems**. The exact size and contents of the metadata can vary depending on the allocator and architecture.
+The **4 bytes** of **heap chunk metadata** include both the **metadata** itself and **any padding** required to satisfy **8-byte alignment** on **x86 64-bit systems**. The exact size and contents of the metadata can vary depending on the allocator and architecture.
 
 ---
 

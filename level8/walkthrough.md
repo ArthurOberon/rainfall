@@ -99,7 +99,7 @@ service
 
 From this output, we can observe that the **distance between consecutive heap allocations** is **`0x10 bytes`** (`16 bytes`).
 
-This is expected behavior on **x86 32-bit systems**, because of the **small size** of the **allocation** and the allocator **8-byte alignment** and **chunk metadata**.
+This is expected behavior on **x86 64-bit systems**, because of the **small size** of the **allocation** and the allocator **8-byte alignment** and **chunk metadata**.
 
 ### 3. Exploit Development
 
