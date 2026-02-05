@@ -64,7 +64,7 @@ Here, we find 2 interesting functions: `main` and `greetuser`.
 
 The `main` function expects exactly **2 arguments**. If this condition is not met, the program immediately returns `1`.
 
-Then, the 2 arguments inputs are copied.
+Then, the 2 command-line arguments are copied into local buffers:
 - **`argv[1]`** is **copied** into **`local_60`** using `strncpy` with a maximum size of **`0x28` bytes** (40 in decimal).
 - **`argv[2]`** is **copied** into **`acStack_38`** using `strncpy` with a maximum size of **`0x20` bytes** (32 in decimal).
 
@@ -87,7 +87,7 @@ $2 = 0x8048740 "nl"
 
 ---
 
-The it is manually copying data from `local_60` to another stack location (`0xffffff50`).
+Then it is manually copying data from `local_60` to another stack location (`0xffffff50`).
 
 Finally, the function calls `greetuser()` and returns its result.
 
@@ -95,7 +95,7 @@ Finally, the function calls `greetuser()` and returns its result.
 
 The `greetuser` function **builds a greeting message** based on the value of the global variable **`language`**.
 
-It defines several 2 local variables `local_4c` and `local_44`. Depending on the selected language:
+It defines 2 local variables `local_4c` and `local_44`. Depending on the selected language:
 - If `language` is set to `1`, it prepares a **Finnish greeting**.
 - If `language` is set to `2`, it prepares a **Dutch greeting**.
 - If `language` is set to `0`, it defaults to an **English greeting**.
@@ -112,7 +112,7 @@ The idea is to **redirect the execution flow** to this **shellcode** by overflow
 
 Here is the stack layout:
 
-![img](Ressouces/bonus2.png)
+![img](Ressources/bonus2.png)
 
 The **distance** between the start of the buffer used by **`strcat()`** and the **`saved EIP`** is **`76 bytes`**, or **`80 bytes`** if we include the **`4 bytes`** needed to **overwrite `saved EIP`**.
 However, with **direct user input**, we can only reach **`72 bytes`**, which is not sufficient to fully overwrite the `saved EIP`.
@@ -123,6 +123,18 @@ The greeting word by `greetuser` depends on the selected language:
 - With the **default language**, `"Hello "` **adds `6 bytes`**.
 - With **`LANG=fi`**, `"Hyvää päivää "` **adds `18 bytes`** *(because of the multibyte ä characters)*.
 - With **`LANG=nl`**, `"Goedemiddag! "` **adds `13 bytes`**.
+
+---
+
+**Note:**
+The character `ä` is encoded as **2 bytes** in UTF-8 (`0xC3 0xA4`). This is why the string is **18 bytes** long instead of the expected 13 bytes.
+
+```
+[H] [y] [v] [ä] [ä] [ ] [p] [ä] [i] [v] [ä] [ä] [ ]
+ 1   1   1   2   2   1    1   2   1   1   2   2   1		= 18 bytes
+```
+
+---
 
 By setting `LANG` to `fi` or `nl`, we **increase the total number of bytes** written by `strcat()`. This extra offset allows us to reach and overwrite the `saved EIP`.
 
@@ -142,6 +154,8 @@ We **store** it **inside** the **`LANG`** environment variable, **preceded** by 
 LANG=$(python -c "print 'fi' +  '\x90' * 100 + '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80'")
 ```
 
+Environment variables are stored in a **predictable location** on the stack, above the program's stack frame. By placing our shellcode in `LANG`, we avoid size limitations of command-line arguments.
+
 ---
 
 Next, we need to **compute the required padding**.
@@ -158,7 +172,7 @@ ________________________________________________________________________________
 80 - 18 - 40 - 4 = 18 bytes.
 ```
 
-So we need **`18 bytes`** of padding in the second argument to reach and overwrite the `saved EIP`.
+Therefore, we need **`18 bytes`** of padding in the second argument to reach and overwrite the `saved EIP`.
 
 ---
 
@@ -211,7 +225,7 @@ Let's take **`0xbffffef0`**, In little-endian:
 
 ### Overflow Visualization
 
-![img](Ressources/bonus1-overflow.png)
+![img](Ressources/bonus2-overflow.png)
 
 ### Create the Payload
 

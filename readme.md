@@ -17,7 +17,7 @@ This repository contains the writeups for each level. Each folder includes:
 * **gdb-dump**: the asm dump of the code.
 * **source**: a pseudo code reconstitution.
 * **walkthrough.md**: a markdown file that include the different steps of the test solution and the detailed explaination of the level.
-* **resources/** *(optional)*: supplementary files required to solve the challenge and image for the walkthrough file.
+* **Ressources/** *(optional)*: supplementary files required to solve the challenge and image for the walkthrough file.
 
 > ⚠️ Warning: These are not exhaustive solutions.
 
@@ -36,3 +36,14 @@ Throughout the different levels, several tools and techniques are used to solve 
 * Analyzing environments and understanding how systems and programs work.
 * Detecting and identifying weaknesses or vulnerabilities.
 * Exploiting vulnerabilities, including bypass techniques, code injection, program manipulation, and reverse engineering.
+
+#### Concept covered
+
+* Stack-based buffer overflows
+* Heap-based buffer overflows
+* Format string attacks
+* GOT overwrites
+* Integer overflows
+* Environment variable exploitation
+* C++ vtable hijacking
+* NOP sled usage

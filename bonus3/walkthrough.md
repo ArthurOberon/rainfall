@@ -68,7 +68,9 @@ If **`argv[1]`** is **equal** to an **empty string** (`'\0'`), the comparison su
 ## 3. Exploit Development
 
 The exploitation here is straightforward.
-We simply need to **provide an argument** that is a **null byte** (`'\0'`) . This can be done with **`""`**.
+We simply need to **provide an argument** that is a **null byte** (`'\0'`). This can be done with **`""`**.
+In **shell syntax**, an **empty string** is represented as **`""`** *(2 double quotes with nothing between them)*.
+
 
 ## 4. Capture The Flag
 
@@ -81,12 +83,7 @@ XXX
 $ exit
 ```
 
-**Explanation:**
-- `python`			: launches the Python interpreter.
-- `-c` 				: executes the command passed as a string.
-- `print` 			: outputs data to standard output.
-
-## 5. Finish !
+## 5. Successfully Complete !
 
 ```bash
 bonus3@RainFall:~$ su end 
