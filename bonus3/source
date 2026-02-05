@@ -1,6 +1,6 @@
-undefined4 main(int param_1,int param_2)
+int main(int param_1,int param_2)
 {
-  undefined4 uVar1;
+  int uVar1;
   int iVar2;
   char *pcVar3;
   byte bVar4;

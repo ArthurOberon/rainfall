@@ -1,8 +1,8 @@
-undefined4 main(undefined4 param_1,int param_2)
+int main(int param_1,int param_2)
 {
   int iVar1;
   char *local_20;
-  undefined4 local_1c;
+  int local_1c;
   __uid_t local_18;
   __gid_t local_14;
   

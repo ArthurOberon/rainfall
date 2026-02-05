@@ -30,7 +30,6 @@ void __thiscall N::N(N *this,int param_1)
 /* N::setAnnotation(char*) */
 
 void __thiscall N::setAnnotation(N *this,char *param_1)
-
 {
   size_t __n;
   

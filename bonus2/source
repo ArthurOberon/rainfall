@@ -1,9 +1,9 @@
-undefined4 main(int param_1,int param_2)
+int main(int param_1,int param_2)
 {
-  undefined4 uVar1;
+  int uVar1;
   int iVar2;
   char *pcVar3;
-  undefined4 *puVar4;
+  char *puVar4;
   byte bVar5;
   char local_60 [40];
   char acStack_38 [36];
@@ -35,9 +35,9 @@ undefined4 main(int param_1,int param_2)
       }
     }
     pcVar3 = local_60;
-    puVar4 = (undefined4 *)&stack0xffffff50;
+    puVar4 = (char *)&stack0xffffff50;
     for (iVar2 = 0x13; iVar2 != 0; iVar2 = iVar2 + -1) {
-      *puVar4 = *(undefined4 *)pcVar3;
+      *puVar4 = *(char *)pcVar3;
       pcVar3 = pcVar3 + ((uint)bVar5 * -2 + 1) * 4;
       puVar4 = puVar4 + (uint)bVar5 * -2 + 1;
     }
@@ -52,7 +52,7 @@ undefined4 main(int param_1,int param_2)
 void greetuser(void)
 {
   char local_4c [4];
-  undefined4 local_48;
+  int local_48;
   char local_44 [64];
   
   if (language == 1) {
@@ -81,3 +81,28 @@ void greetuser(void)
   puts(local_4c);
   return;
 }
+
+/*
+simplified:
+
+void greetuser(char *buffer)
+{
+  char local_4c [4];
+  int local_48;
+  char local_44 [64];
+  
+  if (language == 1) {
+    builtin_strncpy(local_4c, "Hyvää päivää ", 18);
+  }
+  else if (language == 2) {
+    builtin_strncpy(local_4c, "Goedemiddag! ", 13);
+  }
+  else if (language == 0) {
+    builtin_strncpy(local_4c, "Hello ", 6);
+  }
+  strcat(local_4c, buffer);
+  puts(local_4c);
+  return;
+}
+
+*/
