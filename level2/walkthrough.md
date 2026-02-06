@@ -158,35 +158,9 @@ A **shellcode** is a **sequence of machine instructions** encoded in hexadecimal
 This shellcode is 21 bytes long, with this we can **define the structure of the payload** :
 ```
 <shellcode> + <buffer overflow> + <shellcode address>
-	21	   	+ 		59		        + 			4				 = 84
-```
-
-##### Corrupted Bytes
-
-Looking at the stack layout, we need to reach the saved EIP at offset 76, but we add 4 extra bytes to account for the corrupted `unaff_retaddr` zone.
-The `and $0xb0000000, %eax` operation **modifies these 4 bytes**, corrupting part of our payload if we write there.
-
-This behavior can be observed with the following tests:
-
-```bash
-level2@RainFall:~$ ./level2 
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa        
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-level2@RainFall:~$ ./level2 
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa       
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJ����
-level2@RainFall:~$ ./level2 
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJ����
-level2@RainFall:~$ ./level2 
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJ����
-level2@RainFall:~$ ./level2 
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJ����
-level2@RainFall:~$ ./level2 
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJ�
+   21       +        59         + 			4				   = 84 bytes
+└─────────────┬────────────────┘
+			80 bytes
 ```
 
 ---
@@ -212,6 +186,11 @@ With this `ltrace` output we can get the **return value** of `strdup()`, which i
 ```
 \x08\xa0\x04\x08
 ```
+
+### Overflow Visualization
+
+![img](Ressources/level2-overflow.png)
+
 
 ### Create the Payload
 

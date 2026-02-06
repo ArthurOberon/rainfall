@@ -1,6 +1,6 @@
 void main(void)
 {
-  char local_50 [76];
+  char local_50 [72];
   
   gets(local_50);
   return;
