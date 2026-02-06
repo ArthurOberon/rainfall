@@ -259,6 +259,10 @@ Now we have to **move forward** in it to **get in the middle** of the **`NOP` in
 
 ---
 
+### Overflow Visualization
+
+![img](Ressources/bonus0.png)
+
 ### Create the Payload
 
 
