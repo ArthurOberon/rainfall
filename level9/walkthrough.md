@@ -98,14 +98,15 @@ From the **constructor and the `setAnnotation()` method**, we can deduce a **pse
 ```c++
 class N
 {
-private:
-	char annotation_buffer;	// this + 4			(0x68 - 4 = 0x64 or 100 in decimal)
-	int integer;	// this + 0x68
-public:
-	N(int i);
-	~N();
+	private:
+		char annotation_buffer;	// this + 4			(0x68 - 4 = 0x64 or 100 in decimal)
+		int integer;	// this + 0x68
 
-	void setAnnotation(char s);
+	public:
+		N(int i);
+		~N();
+
+		void setAnnotation(char s);
   
 };
 ```
@@ -190,7 +191,7 @@ Therfore, the payload must be structured as follows:
 					    108 bytes
 ```
 
-Where `<transfer address>` points to the shell code.
+Where `<transfer address>` points to the shellcode.
 
 ![img](Ressources/level9-payload.png)
 

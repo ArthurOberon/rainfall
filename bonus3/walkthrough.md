@@ -55,6 +55,7 @@ Most of the **beginning of main** is **misleading** and does not directly impact
 Only the **following lines** are important:
 
 ```c
+    iVar2 = atoi(*(char **)(param_2 + 4));
     local_98[iVar2] = '\0';
     iVar2 = strcmp(local_98,*(char **)(param_2 + 4));
     if (iVar2 == 0) {
@@ -62,8 +63,9 @@ Only the **following lines** are important:
     }
 ```
 
-The program **compares** (using `strcmp`) **`argv[1]`** with a **`local_98`** that is set as **null-terminated**.
-If **`argv[1]`** is **equal** to an **empty string** (`'\0'`), the comparison succeeds and the program spawns a shell using `execl("/bin/sh","sh",0)`.
+The program **compares** (using `strcmp`) **`argv[1]`** with a **`local_98[iVar2]`** that is set as **null-terminated**.
+
+If **`argv[1]`** is **equal** to an **empty string** (`'\0'`), **`iVar2`** is equal to **`0`**, **`local_98`** is considered as **`null`** and the **comparison succeeds** and the program spawns a shell using `execl("/bin/sh","sh",0)`.
 
 ## 3. Exploit Development
 

