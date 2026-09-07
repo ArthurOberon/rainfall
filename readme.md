@@ -9,6 +9,11 @@ Each CTF level enables participants to learn and practice specific skills to ide
 
 ---
 
+## Collaboration
+This project was a collaborative effort:
+- [Arthur Oberon](https://github.com/ArthurOberon)
+- [Seydou Mestre](https://github.com/Ceidoux)
+
 ## 📂 Repository Content
 
 This repository contains the writeups for each level. Each folder includes:
